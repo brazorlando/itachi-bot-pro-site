@@ -202,114 +202,618 @@ body:not(.logged) .app{display:none}body.logged #loginScreen{display:none}
 'use strict';
 // Servir este ficheiro no mesmo domínio e porta da API.
 // Sem URLs externas arbitrárias, sem tokens em query strings.
-const API=String(window.ITACHI_API_URL||'').replace(/\/$/,'');let token='';let currentPage='dashboard';let authMode='login';let dashboard=null;let currentActivation='';
+const API=String(window.ITACHI_API_URL||'').replace(/\/$/,'');
+let token='';
+let currentPage='dashboard';
+let authMode='login';
+let dashboard=null;
+let currentActivation='';
 const $=id=>document.getElementById(id);
 const fmtNumber=new Intl.NumberFormat('pt-MZ');
-const money=cents=>Number.isFinite(Number(cents))?new Intl.NumberFormat('pt-MZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(cents)/100)+' MT':'Não comunicado';
+const money=cents=>Number.isFinite(Number(cents))
+  ?new Intl.NumberFormat('pt-MZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(cents)/100)+' MT'
+  :'Não comunicado';
 const num=n=>Number.isFinite(Number(n))?fmtNumber.format(Number(n)):'Não comunicado';
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const text=s=>String(s??'').trim();
-function errorMessage(e){const msg=String(e?.message||'Erro de comunicação');if(/Failed to fetch|NetworkError/i.test(msg))return 'Não foi possível alcançar a API através do proxy da Vercel. Utiliza o teste de ligação para identificar a falha.';return msg}
-function busy(id,message='A consultar o servidor…'){const el=$(id);el.innerHTML='<div class="empty-data">'+safe(message)+'</div>'}
-function fail(id,message){busy(id,message)}
+
+function errorMessage(e){
+  const msg=String(e?.message||'Erro de comunicação');
+  if(/Failed to fetch|NetworkError/i.test(msg))return 'Não foi possível alcançar a API através do proxy da Vercel. Utiliza o teste de ligação para identificar a falha.';
+  return msg;
+}
+function busy(id,message='A consultar o servidor…'){
+  const el=$(id);
+  if(!el)return;
+  el.innerHTML='<div class="empty-data">'+safe(message)+'</div>';
+}
+function fail(id,message){busy(id,message);}
+
 async function api(path,method='GET',data){
- const headers={'Accept':'application/json'};if(token)headers.Authorization='Bearer '+token;if(data!==undefined)headers['Content-Type']='application/json';
- const r=await fetch(API+path,{method,headers,body:data!==undefined?JSON.stringify(data):undefined,cache:'no-store'});
- const t=await r.text();let j;try{j=JSON.parse(t)}catch{throw Error('O servidor devolveu uma resposta inválida. HTTP '+r.status)}
- if(!r.ok||j?.ok===false)throw Error(j?.message||j?.erro||j?.error||j?.estado||'Pedido não autorizado. HTTP '+r.status);
- return j;
+  const headers={'Accept':'application/json'};
+  if(token)headers.Authorization='Bearer '+token;
+  if(data!==undefined)headers['Content-Type']='application/json';
+  const r=await fetch(API+path,{method,headers,body:data!==undefined?JSON.stringify(data):undefined,cache:'no-store'});
+  const t=await r.text();
+  let j;
+  try{j=JSON.parse(t);}catch{throw Error('O servidor devolveu uma resposta inválida. HTTP '+r.status);}
+  if(!r.ok||j?.ok===false)throw Error(j?.message||j?.erro||j?.error||j?.estado||'Pedido não autorizado. HTTP '+r.status);
+  return j;
 }
+
 async function testConnection(){
- const box=$('connectionReport');box.style.color='var(--muted)';box.textContent='A verificar /backend/api/v4/dashboard sem enviar PIN nem dados pessoais…';
- try{
-  const r=await fetch('/backend/api/v4/dashboard',{method:'GET',cache:'no-store',headers:{'Accept':'application/json'}});
-  const ct=r.headers.get('content-type')||'';
-  const raw=await r.text();let parsed=null;try{parsed=JSON.parse(raw)}catch{}
-  if(ct.includes('text/html')||(!parsed&&raw.trim().startsWith('<'))){
-   box.style.color='var(--red)';box.textContent='Erro: recebemos HTML (HTTP '+r.status+') em vez da API. Confirma se o vercel.json está na raiz do GitHub e se a Vercel publicou a última versão.';return;
+  const box=$('connectionReport');
+  box.style.color='var(--muted)';
+  box.textContent='A verificar /backend/api/v4/dashboard sem enviar PIN nem dados pessoais…';
+  try{
+    const r=await fetch('/backend/api/v4/dashboard',{method:'GET',cache:'no-store',headers:{'Accept':'application/json'}});
+    const ct=r.headers.get('content-type')||'';
+    const raw=await r.text();
+    let parsed=null;
+    try{parsed=JSON.parse(raw);}catch{}
+    if(ct.includes('text/html')||(!parsed&&raw.trim().startsWith('<'))){
+      box.style.color='var(--red)';
+      box.textContent='Erro: recebemos HTML (HTTP '+r.status+') em vez da API. Confirma se o vercel.json está na raiz do GitHub e se a Vercel publicou a última versão.';
+      return;
+    }
+    if(r.status===401||r.status===403){
+      box.style.color='var(--green)';
+      box.textContent='API alcançada (HTTP '+r.status+'). A resposta exige autenticação, como esperado. A conexão chegou ao servidor.';
+      return;
+    }
+    if(r.status===404){
+      box.style.color='var(--orange)';
+      box.textContent='HTTP 404: o caminho pedido não foi encontrado. Verifica a publicação do proxy e a rota /api/v4/dashboard no CyberHost.';
+      return;
+    }
+    if(r.status===502||r.status===503||r.status===504){
+      box.style.color='var(--red)';
+      box.textContent='HTTP '+r.status+': a Vercel não conseguiu obter resposta válida do CyberHost. Verifica se o servidor está acessível externamente na porta 3023.';
+      return;
+    }
+    if(parsed){
+      box.style.color=r.ok?'var(--green)':'var(--orange)';
+      box.textContent='O proxy respondeu com JSON (HTTP '+r.status+'). '+(r.ok?'Ligação ao servidor aparentemente disponível.':'O servidor respondeu com um erro; o caminho chegou a uma API.');
+      return;
+    }
+    box.style.color='var(--red)';
+    box.textContent='Resposta inesperada (HTTP '+r.status+'). É necessário inspeccionar a ligação entre Vercel e CyberHost.';
+  }catch(e){
+    box.style.color='var(--red)';
+    box.textContent='Erro de rede ao testar /backend: '+String(e.message||e)+'. Não introduzas o PIN até corrigirmos a ligação.';
   }
-  if(r.status===401||r.status===403){box.style.color='var(--green)';box.textContent='API alcançada (HTTP '+r.status+'). A resposta exige autenticação, como esperado. A conexão chegou ao servidor.';return}
-  if(r.status===404){box.style.color='var(--orange)';box.textContent='HTTP 404: o caminho pedido não foi encontrado. Verifica a publicação do proxy e a rota /api/v4/dashboard no CyberHost.';return}
-  if(r.status===502||r.status===503||r.status===504){box.style.color='var(--red)';box.textContent='HTTP '+r.status+': a Vercel não conseguiu obter resposta válida do CyberHost. Verifica se o servidor está acessível externamente na porta 3023.';return}
-  if(parsed){box.style.color=r.ok?'var(--green)':'var(--orange)';box.textContent='O proxy respondeu com JSON (HTTP '+r.status+'). '+(r.ok?'Ligação ao servidor aparentemente disponível.':'O servidor respondeu com um erro; o caminho chegou a uma API.');return}
-  box.style.color='var(--red)';box.textContent='Resposta inesperada (HTTP '+r.status+'). É necessário inspeccionar a ligação entre Vercel e CyberHost.';
- }catch(e){box.style.color='var(--red)';box.textContent='Erro de rede ao testar /backend: '+String(e.message||e)+'. Não introduzas o PIN até corrigirmos a ligação.'}
 }
-function setAuthMode(mode){authMode=mode;$('nameField').hidden=mode!=='register';$('confirmField').hidden=mode!=='register';$('loginTab').classList.toggle('current',mode==='login');$('registerTab').classList.toggle('current',mode==='register');$('authSubmit').textContent=mode==='login'?'Entrar no painel':'Criar conta';$('authError').textContent=''}
+
+function setAuthMode(mode){
+  authMode=mode;
+  $('nameField').hidden=mode!=='register';
+  $('confirmField').hidden=mode!=='register';
+  $('loginTab').classList.toggle('current',mode==='login');
+  $('registerTab').classList.toggle('current',mode==='register');
+  $('authSubmit').textContent=mode==='login'?'Entrar no painel':'Criar conta';
+  $('authError').textContent='';
+}
 const phoneNormalize=v=>String(v).replace(/\D/g,'').replace(/^258/,'');
-function browserDeviceId(){let id='';try{id=sessionStorage.getItem('itachi_browser_id')||''}catch{}if(!id){id='web_'+Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem('itachi_browser_id',id)}catch{}}return id.slice(0,128)}
+function browserDeviceId(){
+  let id='';
+  try{id=sessionStorage.getItem('itachi_browser_id')||'';}catch{}
+  if(!id){
+    id='web_'+Math.random().toString(36).slice(2)+Date.now().toString(36);
+    try{sessionStorage.setItem('itachi_browser_id',id);}catch{}
+  }
+  return id.slice(0,128);
+}
 $('authForm').addEventListener('submit',async ev=>{
- ev.preventDefault();$('authError').textContent='';const phone=phoneNormalize($('authPhone').value);const pin=$('authPin').value;
- if(!/^(84|85|86|87|82|83)\d{7}$/.test(phone)){$('authError').textContent='Introduz um número moçambicano válido de 9 dígitos.';return}
- if(pin.length<4){$('authError').textContent='Introduz o PIN da tua conta.';return}
- if(authMode==='register'&&pin!==$('authConfirm').value){$('authError').textContent='Os PINs não coincidem.';return}
- const b=$('authSubmit');b.disabled=true;b.textContent='A contactar o servidor…';
- try{
-  const payload={numero:phone,pin,dispositivo:browserDeviceId(),aparelho:'Portal Web ITACHI'};
-  if(authMode==='register')payload.nome=$('authName').value.trim();
-  const j=await api('/api/v4/auth/'+(authMode==='login'?'login':'register'),'POST',payload);
-  if(!j.token){if(authMode==='register'){setAuthMode('login');$('authError').style.color='var(--green)';$('authError').textContent='Conta criada. Agora inicia sessão.';return}throw Error('O servidor não devolveu uma sessão autorizada.')}
-  token=j.token;document.body.classList.add('logged');$('merchantPhone').textContent=phone;$('authPin').value='';$('authConfirm').value='';await loadDashboard();
- }catch(e){$('authError').style.color='var(--red)';$('authError').textContent=errorMessage(e)}finally{b.disabled=false;b.textContent=authMode==='login'?'Entrar no painel':'Criar conta'}
+  ev.preventDefault();
+  $('authError').textContent='';
+  const phone=phoneNormalize($('authPhone').value);
+  const pin=$('authPin').value;
+  if(!/^(84|85|86|87|82|83)\d{7}$/.test(phone)){$('authError').textContent='Introduz um número moçambicano válido de 9 dígitos.';return;}
+  if(pin.length<4){$('authError').textContent='Introduz o PIN da tua conta.';return;}
+  if(authMode==='register'&&pin!==$('authConfirm').value){$('authError').textContent='Os PINs não coincidem.';return;}
+  const b=$('authSubmit');
+  b.disabled=true;
+  b.textContent='A contactar o servidor…';
+  try{
+    const payload={numero:phone,pin,dispositivo:browserDeviceId(),aparelho:'Portal Web ITACHI'};
+    if(authMode==='register')payload.nome=$('authName').value.trim();
+    const j=await api('/api/v4/auth/'+(authMode==='login'?'login':'register'),'POST',payload);
+    if(!j.token){
+      if(authMode==='register'){setAuthMode('login');$('authError').style.color='var(--green)';$('authError').textContent='Conta criada. Agora inicia sessão.';return;}
+      throw Error('O servidor não devolveu uma sessão autorizada.');
+    }
+    token=j.token;
+    document.body.classList.add('logged');
+    $('merchantPhone').textContent=phone;
+    $('authPin').value='';
+    $('authConfirm').value='';
+    await loadDashboard();
+  }catch(e){
+    $('authError').style.color='var(--red)';
+    $('authError').textContent=errorMessage(e);
+  }finally{
+    b.disabled=false;
+    b.textContent=authMode==='login'?'Entrar no painel':'Criar conta';
+  }
 });
-function logout(){token='';dashboard=null;document.body.classList.remove('logged');$('authPin').value='';$('authError').textContent='';navigate('dashboard')}
-function toggleSidebar(force){const o=$('sidebar'),overlay=$('mobileOverlay');let open=typeof force==='boolean'?force:!o.classList.contains('open');o.classList.toggle('open',open);overlay.classList.toggle('show',open)}
-function navigate(page){const el=$('page-'+page);if(!el)return;currentPage=page;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p===el));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('topTitle').textContent=({dashboard:'Dashboard',orders:'Pedidos',devices:'Aparelhos e activação',products:'Produtos e pacotes',groups:'Grupos comerciais',whatsapp:'WhatsApp',subscription:'Assinatura',wallet:'Carteiras dos clientes',plans:'Planos e compras',payments:'Pagamentos e renovação',reports:'Relatórios',settings:'Conta e segurança'})[page]||page;toggleSidebar(false);window.scrollTo(0,0);refreshCurrent()}
+
+function logout(){
+  token='';dashboard=null;
+  document.body.classList.remove('logged');
+  $('authPin').value='';
+  $('authError').textContent='';
+  navigate('dashboard');
+}
+function toggleSidebar(force){
+  const o=$('sidebar'),overlay=$('mobileOverlay');
+  const open=typeof force==='boolean'?force:!o.classList.contains('open');
+  o.classList.toggle('open',open);
+  overlay.classList.toggle('show',open);
+}
+function navigate(page){
+  const el=$('page-'+page);
+  if(!el)return;
+  currentPage=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p===el));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  $('topTitle').textContent=({dashboard:'Dashboard',orders:'Pedidos',devices:'Aparelhos e activação',products:'Produtos e pacotes',groups:'Grupos comerciais',whatsapp:'WhatsApp',subscription:'Assinatura',wallet:'Carteiras dos clientes',plans:'Planos e compras',payments:'Pagamentos e renovação',reports:'Relatórios',settings:'Conta e segurança'})[page]||page;
+  toggleSidebar(false);
+  window.scrollTo(0,0);
+  refreshCurrent();
+}
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
-function refreshCurrent(){if(!token)return;({dashboard:loadDashboard,orders:loadOrders,devices:loadDevices,products:loadProducts,groups:loadGroups,whatsapp:loadWhatsApp,subscription:loadSubscription,wallet:()=>{},plans:loadPlans,payments:loadPayments,reports:loadReports,settings:loadAccount})[currentPage]?.()}
-function kpi(title,value,detail){return '<div class="kpi"><div class="kpi-top">'+safe(title)+'<span class="kpi-icon">◈</span></div><div class="kpi-value">'+safe(value)+'</div><div class="kpi-foot">'+safe(detail)+'</div></div>'}
-const count= (obj,k)=>obj&&Object.prototype.hasOwnProperty.call(obj,k)&&Number.isFinite(Number(obj[k]))?Number(obj[k]):null;
+
+function refreshCurrent(){
+  if(!token)return;
+  ({dashboard:loadDashboard,orders:loadOrders,devices:loadDevices,products:loadProducts,groups:loadGroups,whatsapp:loadWhatsApp,subscription:loadSubscription,wallet:()=>{},plans:loadPlans,payments:loadPayments,reports:loadReports,settings:loadAccount})[currentPage]?.();
+}
+
+function kpi(title,value,detail){
+  return '<div class="kpi"><div class="kpi-top">'+safe(title)+'<span class="kpi-icon">◈</span></div><div class="kpi-value">'+safe(value)+'</div><div class="kpi-foot">'+safe(detail)+'</div></div>';
+}
+const count=(obj,k)=>obj&&Object.prototype.hasOwnProperty.call(obj,k)&&Number.isFinite(Number(obj[k]))?Number(obj[k]):null;
 const statuses={queued:'Em fila',assigned:'Atribuídos',completed:'Concluídos',failed:'Com falha',unknown:'Em verificação',pending:'Pendentes',executing:'Em execução',reserved:'Reservados'};
 const stateLabel=s=>statuses[s]||'Outro estado';
-function summaryRow(icon,title,detail){return '<div class="activity-item"><div class="activity-icon">'+safe(icon)+'</div><div><b>'+safe(title)+'</b><small>'+safe(detail)+'</small></div></div>'}
-async function loadDashboard(){busy('dashboardKpis');busy('orderSummary');busy('operationSummary');try{
- const d=await api('/api/v4/dashboard');dashboard=d;const orders=d.orders||{},counts=Object.values(orders).filter(v=>Number.isFinite(Number(v))).map(Number),total=counts.reduce((a,b)=>a+b,0);
- const hasOrders=Object.keys(orders).length>0;const online=count(d.devices,'online'),devices=count(d.devices,'total');const wallets=d.walletTotalCents;
- $('dashboardKpis').innerHTML=kpi('Saldo das carteiras',wallets==null?'Não comunicado':money(wallets),'Saldo financeiro dos clientes')+kpi('Pedidos totais',hasOrders?num(total):'0','Todos os estados')+kpi('Aparelhos online',online==null?'Não comunicado':num(online),(devices==null?'—':num(devices))+' aparelhos associados')+kpi('Produtos activos',count(d.products,'enabled')==null?'Não comunicado':num(d.products.enabled),'Catálogo comercial')+kpi('Grupos activos',count(d.groups,'enabled')==null?'Não comunicado':num(d.groups.enabled),'Grupos habilitados')+kpi('Pedidos concluídos',num(count(orders,'completed')??0),'Operações finalizadas')+kpi('Pedidos com falha',num(count(orders,'failed')??0),'Necessitam de atenção')+kpi('Em verificação',num(count(orders,'unknown')??0),'Não repetir sem confirmação');
- $('orderSummary').innerHTML=Object.entries(orders).length?Object.entries(orders).map(([k,v])=>summaryRow('▤',stateLabel(k),num(v)+' pedido(s)')).join(''):'<div class="empty-data">Ainda não existem pedidos registados.</div>';
- const sub=d.subscription||{};const expiry=sub.expiresAt||sub.expires_at||null;
- $('sideSub').textContent=sub.active===true?'Activa':sub.active===false?'Inactiva':'Não comunicado';$('sideExpiry').textContent=expiry?'Validade: '+dateFmt(expiry):'Validade não comunicada';
- const wa=d.whatsapp||{};const waState=wa.status||wa.state||'Não comunicado';$('operationSummary').innerHTML=summaryRow('▣','Aparelhos', (online??'—')+' online de '+(devices??'—')+' associados')+summaryRow('◉','WhatsApp',waState)+summaryRow('◇','Assinatura',expiry?'Válida até '+dateFmt(expiry):'Data não comunicada');
- }catch(e){fail('dashboardKpis',errorMessage(e));fail('orderSummary','');fail('operationSummary','')}}
-function dateFmt(raw){const t=Date.parse(raw);return Number.isNaN(t)?String(raw).slice(0,10):new Intl.DateTimeFormat('pt-MZ',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(t))}
-async function loadDevices(){busy('devicesArea');try{const j=await api('/devices');const list=j.devices||j.dispositivos||[];if(!Array.isArray(list))throw Error('Formato de aparelhos inesperado.');if(!list.length){busy('devicesArea','Ainda não há aparelhos associados à tua conta.');return}
- $('devicesArea').innerHTML=list.map(d=>{const online=d.online===true,enabled=d.enabled??d.ativo;return '<div class="device"><div class="device-top"><div class="device-symbol">▣</div><span class="status '+(online?'ok':'wait')+'">'+(online?'Online':'Estado não confirmado')+'</span></div><h3>'+safe(d.nome||d.label||'Aparelho Android')+'</h3><p>Executor associado à tua conta</p><div class="device-meta"><div><span>ID do aparelho</span><b>'+safe(String(d.uuid||d.id||'—').slice(0,18))+'</b></div><div><span>Autorizado</span><b>'+(d.aprovado===true||d.approved===true?'Sim':'Não confirmado')+'</b></div><div><span>Activado</span><b>'+(enabled===true?'Sim':enabled===false?'Não':'Não comunicado')+'</b></div></div></div>'}).join('');
- }catch(e){fail('devicesArea',errorMessage(e))}}
-async function createActivation(){if(!confirm('Gerar um código temporário para associar uma APK à tua conta?'))return;const block=$('activationResult');block.style.display='none';try{const j=await api('/devices/activation-code','POST',{});const code=j.codigoAtivacao||j.code;if(!code)throw Error('Servidor não devolveu código de activação.');currentActivation=String(code);$('activationCode').textContent=code;$('activationExpiry').textContent='Válido durante '+(j.validadeMinutos||15)+' minutos. Uso único.';block.style.display='block'}catch(e){toast(errorMessage(e))}}
-async function copyCode(){if(!currentActivation)return;try{await navigator.clipboard.writeText(currentActivation);toast('Código copiado.')}catch{toast('Selecciona o código para o copiar.')}}
-async function loadProducts(){busy('productsArea');try{const j=await api('/app/products');const list=j.products||[];window.catalogCache=list;if(!Array.isArray(list))throw Error('Formato de produtos inesperado.');if(!list.length){busy('productsArea','Ainda não existem produtos disponíveis no catálogo.');return}
- $('productsArea').innerHTML=list.map(p=>'<div class="product"><div class="product-icon">▦</div><h3>'+safe(p.type||'Pacote')+' · '+safe(p.quantityMB==null?'—':num(p.quantityMB)+' MB')+'</h3><p>Grupo: '+safe(p.groupJid||'Não comunicado')+'</p><div class="price">'+safe(p.priceCents==null?'Não comunicado':money(p.priceCents))+'</div><div class="device-meta"><div><span>Estado</span><b>'+(p.enabled?'Activo':'Inactivo')+'</b></div><div><span>ID</span><b>'+safe(String(p.id||'').slice(0,20))+'</b></div></div><button class="btn small product-edit" data-product-index="'+list.indexOf(p)+'">Editar preço / estado</button></div>').join('');
- }catch(e){fail('productsArea',errorMessage(e))}}
-async function loadGroups(){busy('groupsArea');try{const j=await api('/groups');const list=j.groups||[];if(!Array.isArray(list))throw Error('Formato dos grupos inesperado.');if(!list.length){busy('groupsArea','Não há grupos configurados nesta conta.');return}
- $('groupsArea').innerHTML=list.map(g=>'<div class="group-row"><div><b>'+safe(g.name||g.subject||'Grupo WhatsApp')+'</b><div class="muted" style="margin-top:5px;font-size:10px">'+safe(g.groupJid||g.jid||'ID não comunicado')+'</div></div><span class="status '+(g.enabled===true?'ok':'wait')+'">'+(g.enabled===true?'Activo':g.enabled===false?'Desactivado':'Estado não comunicado')+'</span></div>').join('');
- }catch(e){fail('groupsArea',errorMessage(e))}}
-async function loadWhatsApp(){busy('whatsappArea');try{let w=dashboard?.whatsapp;if(!w){const j=await api('/api/v4/dashboard');w=j.whatsapp||{}}
- const status=text(w.status||w.state||'Não comunicado');$('whatsappArea').innerHTML=summaryRow('◉','Ligação do WhatsApp',status)+summaryRow('▦','Grupos comerciais','Consulta os grupos na secção Grupos.');
- }catch(e){fail('whatsappArea',errorMessage(e))}}
-async function loadSubscription(){busy('subscriptionArea');try{const j=await api('/api/v4/subscription');const s=j.subscription||j;const active=s.active??s.ativo;const expiry=s.expiresAt||s.expires_at||j.expiraEm;
- $('subscriptionArea').innerHTML=summaryRow('◇','Estado da assinatura',active===true?'Activa':active===false?'Inactiva':'Não comunicado')+summaryRow('◷','Validade',expiry?dateFmt(expiry):'Não comunicada')+'<div class="stat-note" style="margin-top:18px">Pagamentos e renovações só serão activados depois de confirmar o contrato e os mecanismos de pagamento existentes no servidor.</div>';
- }catch(e){fail('subscriptionArea',errorMessage(e))}}
-async function connectWhatsApp(){const phone=$('waPhone').value.replace(/\D/g,'');if(!/^258\d{9}$/.test(phone)){$('waConnectResult').textContent='Introduz o número moçambicano com prefixo 258.';return}if(!confirm('Iniciar a ligação do WhatsApp '+phone+' à tua conta?'))return;const el=$('waConnectResult');el.textContent='A iniciar ligação…';try{const j=await api('/whatsapp/connect','POST',{phone});el.textContent=j.message||j.mensagem||'Pedido de ligação aceite. Consulta o emparelhamento.';await loadPairing()}catch(e){el.textContent=errorMessage(e)}}
-async function loadPairing(){const el=$('pairingArea');el.textContent='A consultar o emparelhamento…';try{const j=await api('/whatsapp/pairing');const code=j.code||j.pairingCode||j.codigo||null;const state=j.status||j.state||j.estado||null;el.innerHTML=(state?summaryRow('◉','Estado',String(state)):'')+(code?summaryRow('▤','Código comunicado pelo servidor',String(code)):'')||'Ainda não há código de emparelhamento disponível. Consulta novamente mais tarde.'}catch(e){el.textContent=errorMessage(e)}}
-async function disconnectWhatsApp(){if(!confirm('Tens a certeza que desejas desassociar a sessão WhatsApp desta conta?'))return;try{await api('/whatsapp/disconnect','POST',{});toast('Pedido de desassociação aceite pelo servidor.');await loadWhatsApp()}catch(e){toast(errorMessage(e))}}
-let ordersCache=[];
-async function loadOrders(){busy('ordersArea');try{const j=await api('/orders');const list=j.orders||j.pedidos||[];if(!Array.isArray(list))throw Error('Formato de pedidos inesperado.');ordersCache=list;renderOrdersTable()}catch(e){fail('ordersArea',errorMessage(e))}}
-function renderOrdersTable(){const area=$('ordersArea');const f=$('orderStatusFilter')?.value||'all',q=($('orderSearchText')?.value||'').trim().toLowerCase();const list=ordersCache.filter(o=>(f==='all'||o.status===f)&&[o.id,o.destination,o.numero,o.pedidoId].join(' ').toLowerCase().includes(q));if(!list.length){area.className='empty-data';area.textContent='Nenhum pedido corresponde à pesquisa.';return}area.className='table-wrap';const rows=list.map(o=>'<tr><td>'+safe(String(o.id||o.pedidoId||'—').slice(0,18))+'</td><td>'+safe(o.destination||o.numero||'—')+'</td><td>'+safe(o.quantityMB??o.quantity_mb??o.quantidadeMB??'—')+' MB</td><td>'+safe(stateLabel(o.status||o.estado))+'</td><td>'+safe(o.createdAt?dateFmt(o.createdAt):o.created_at?dateFmt(o.created_at):'—')+'</td></tr>').join('');area.innerHTML='<table><thead><tr><th>Referência</th><th>Destinatário</th><th>Quantidade</th><th>Situação</th><th>Data</th></tr></thead><tbody>'+rows+'</tbody></table>'}
-function exportOrdersCsv(){if(!ordersCache.length){toast('Não há pedidos para exportar.');return}const cols=['Referência','Destino','Quantidade MB','Estado','Data'];const rows=ordersCache.map(o=>[o.id||o.pedidoId||'',o.destination||o.numero||'',o.quantity_mb??o.quantityMB??o.quantidadeMB??'',stateLabel(o.status||o.estado),o.created_at||o.createdAt||'']);const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';const csv='\ufeff'+[cols,...rows].map(r=>r.map(quote).join(';')).join('\r\n');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='itachi-pedidos.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-let editingProduct=null;
-function editProduct(p){if(!p||!p.id){toast('Este produto não tem identificação válida.');return}editingProduct=p;$('editProductPanel').style.display='block';$('editProductName').textContent=(p.type||'Pacote')+' · '+num(p.quantityMB)+' MB';$('editProductPrice').value=(Number(p.priceCents)/100).toFixed(2);$('editProductEnabled').value=String(Boolean(p.enabled));$('editProductMsg').textContent='';$('editProductPanel').scrollIntoView({behavior:'smooth',block:'center'})}
-async function saveProduct(){if(!editingProduct)return;const raw=$('editProductPrice').value.replace(',','.').trim();if(!/^\d+(?:\.\d{1,2})?$/.test(raw)){toast('Introduz um preço válido em MT, com até duas casas decimais.');return}const cents=Math.round(Number(raw)*100);if(!Number.isSafeInteger(cents)||cents<=0||cents>1000000000){toast('Preço fora dos limites permitidos.');return}const enabled=$('editProductEnabled').value==='true';if(!confirm('Confirmas a alteração do preço para '+(cents/100).toFixed(2)+' MT e estado '+(enabled?'activo':'inactivo')+'?'))return;try{await api('/app/products/'+encodeURIComponent(editingProduct.id),'PATCH',{priceCents:cents,enabled});$('editProductPanel').style.display='none';toast('Produto actualizado pelo servidor.');await loadProducts()}catch(e){$('editProductMsg').textContent=errorMessage(e)}}
-function walletJid(v){const t=String(v||'').trim();if(!t||t.length>200||/[\s?#&]/.test(t))throw Error('Introduz o identificador completo e válido do cliente.');return t}
-async function lookupWallet(){const el=$('walletArea');el.textContent='A consultar…';try{const jid=walletJid($('walletJid').value);const j=await api('/wallet?customerJid='+encodeURIComponent(jid));el.innerHTML=summaryRow('₥','Saldo do cliente',money(j.balanceCents))}catch(e){el.textContent=errorMessage(e)}}
-async function creditWallet(){const el=$('creditArea');try{const customerJid=walletJid($('creditJid').value),provider=$('creditProvider').value,reference=$('creditRef').value.trim();if(reference.length<4)throw Error('Introduz uma referência de pagamento válida.');if(!confirm('Verificar esta referência no servidor e, se aprovada, creditar a carteira do cliente?'))return;el.textContent='A confirmar pagamento…';await api('/wallet/redeem','POST',{customerJid,provider,reference});el.textContent='Pagamento aceite e carteira actualizada pelo servidor.'}catch(e){el.textContent=errorMessage(e)}}
-let serverPlans=[];
-async function loadPlans(){busy('plansArea');try{const j=await api('/app/subscription/plans');serverPlans=Array.isArray(j.plans)?j.plans:[];if(!serverPlans.length){busy('plansArea','O servidor não comunicou planos disponíveis.');return}$('plansArea').innerHTML=serverPlans.map((p,i)=>'<div class="product"><div class="product-icon">◇</div><h3>'+safe(p.name||p.nome||p.id||'Plano')+'</h3><p>Informações definidas pelo servidor.</p><div class="price">'+safe(p.priceCents!=null?money(p.priceCents):p.preco!=null?Number(p.preco).toLocaleString('pt-MZ')+' MT':'Preço não comunicado')+'</div><div class="portal-hint">'+safe(p.days||p.dias||'—')+' dias</div><button class="btn small" data-plan-index="'+i+'">Seleccionar</button></div>').join('');$('plansArea').querySelectorAll('[data-plan-index]').forEach(b=>b.addEventListener('click',()=>{navigate('payments');toast('Plano seleccionado. Consulta as instruções de pagamento.') }));}catch(e){fail('plansArea',errorMessage(e))}}
-async function loadPayments(){busy('paymentHistory');try{const j=await api('/app/subscription/history');const list=j.payments||j.history||j.items||[];if(Array.isArray(list)&&list.length){$('paymentHistory').innerHTML=list.map(p=>'<div class="portal-row"><div><b>'+safe(p.description||p.descriptionText||p.plan||'Pagamento de assinatura')+'</b><br><small>'+safe(p.createdAt||p.date||'Data não comunicada')+'</small></div><span class="portal-pill">'+safe(p.status||'Estado não comunicado')+'</span></div>').join('')}else{$('paymentHistory').textContent='Ainda não existem pagamentos de assinatura no histórico.'}}catch(e){fail('paymentHistory',errorMessage(e))}try{const j=await api('/app/subscription/plans');const list=j.plans||[];$('checkoutPlanArea').textContent=list.length?'Plano comunicado pelo servidor: '+String(list[0].name||list[0].nome||list[0].id||'Disponível'):'Nenhum plano disponível';}catch(e){$('checkoutPlanArea').textContent='Planos indisponíveis: '+errorMessage(e)}}
-async function createCheckout(){const el=$('checkoutArea');if(!confirm('Solicitar ao servidor instruções para pagamento da assinatura?'))return;el.textContent='A preparar pagamento…';try{const j=await api('/app/subscription/checkout','POST',{provider:$('checkoutProvider').value});const titles={reference:'Referência',referencia:'Referência',phone:'Número para pagamento',numero:'Número para pagamento',amount:'Valor',valor:'Valor',price:'Preço',preco:'Preço',status:'Estado',message:'Mensagem',mensagem:'Mensagem',expiresAt:'Validade',instrucoes:'Instruções'};const detail=Object.entries(j).filter(([k,v])=>titles[k]&&['string','number','boolean'].includes(typeof v)).map(([k,v])=>'<div class="portal-row"><b>'+safe(titles[k])+'</b><span>'+safe(v)+'</span></div>');el.innerHTML=detail.length?detail.join(''):'O servidor recebeu o pedido, mas não comunicou instruções de pagamento. Não efectues pagamentos sem referência confirmada.'}catch(e){el.textContent=errorMessage(e)}}
-async function verifyPayment(){const el=$('paymentResult'),reference=$('verifyRef').value.trim();if(!reference){el.textContent='Introduz a referência do pagamento.';return}el.textContent='A consultar…';try{const j=await api('/app/subscription/payment-status?provider='+encodeURIComponent($('verifyProvider').value)+'&reference='+encodeURIComponent(reference));const st=j.status||j.state||j.estado||'Em análise';el.innerHTML=summaryRow('◇','Estado comunicado pelo servidor',String(st));await loadSubscription()}catch(e){el.textContent=errorMessage(e)}}
-async function loadReports(){busy('reportsKpis');try{const d=await api('/app/dashboard');const o=d.orders||{};const total=Object.values(o).reduce((n,v)=>n+(Number(v)||0),0);const kpiRows=[['Pedidos registados',num(total),'Todos os estados'],['Pedidos concluídos',num(o.completed||0),'Resultado confirmado'],['Pedidos com falha',num(o.failed||0),'Requer atenção'],['Aparelhos online',num(d.devices?.online??0),'Com ligação recente'],['Produtos activos',num(d.products?.enabled??0),'Catálogo habilitado'],['Saldo dos clientes',money(d.walletTotalCents),'Carteiras financeiras, não receita']];$('reportsKpis').innerHTML=kpiRows.map(x=>kpi(...x)).join('');$('reportsOrders').innerHTML=Object.entries(o).length?Object.entries(o).map(([status,count])=>summaryRow('▤',stateLabel(status),num(count)+' pedido(s)')).join(''):'Ainda não há pedidos registados.';if(!ordersCache.length){try{ordersCache=(await api('/orders')).orders||[]}catch{}}}catch(e){fail('reportsKpis',errorMessage(e));fail('reportsOrders','')}}
-async function loadAccount(){busy('accountArea');try{const j=await api('/app/account');const a=j.account||j.profile||j;const fields=[['Contacto',a.phone||a.numero||'Não comunicado'],['Estado da conta',a.verified===true?'Verificada':a.verified===false?'Por verificar':'Não comunicado'],['Assinatura',a.subscription?.active===true?'Activa':'Consultar na secção Assinatura']];$('accountArea').innerHTML=fields.map(([k,v])=>'<div class="portal-row"><small>'+safe(k)+'</small><b>'+safe(v)+'</b></div>').join('')}catch(e){fail('accountArea',errorMessage(e))}}
-async function changePin(){const oldPin=$('oldPin').value,newPin=$('newPin').value,confirmPin=$('confirmNewPin').value;if(!oldPin||!newPin){$('pinResult').textContent='Preenche os dois PINs.';return}if(newPin!==confirmPin){$('pinResult').textContent='Os novos PINs não coincidem.';return}if(!confirm('Confirmas a alteração do PIN de acesso?'))return;try{await api('/app/security/change-pin','POST',{oldPin,newPin});$('pinResult').textContent='O servidor aceitou a alteração do PIN.';$('oldPin').value=$('newPin').value=$('confirmNewPin').value=''}catch(e){$('pinResult').textContent=errorMessage(e)}}
+function summaryRow(icon,title,detail){
+  return '<div class="activity-item"><div class="activity-icon">'+safe(icon)+'</div><div><b>'+safe(title)+'</b><small>'+safe(detail)+'</small></div></div>';
+}
+function dateFmt(raw){
+  const t=Date.parse(raw);
+  return Number.isNaN(t)?String(raw).slice(0,10):new Intl.DateTimeFormat('pt-MZ',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(t));
+}
 
-let toastTimer;function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),4500)}
-</script></body></html>
+async function loadDashboard(){
+  busy('dashboardKpis');
+  busy('orderSummary');
+  busy('operationSummary');
+  try{
+    const d=await api('/api/v4/dashboard');
+    dashboard=d;
+    const orders=d.orders||{};
+    const counts=Object.values(orders).filter(v=>Number.isFinite(Number(v))).map(Number);
+    const total=counts.reduce((a,b)=>a+b,0);
+    const hasOrders=Object.keys(orders).length>0;
+    const online=count(d.devices,'online'),devices=count(d.devices,'total');
+    const wallets=d.walletTotalCents;
+    $('dashboardKpis').innerHTML=
+      kpi('Saldo das carteiras',wallets==null?'Não comunicado':money(wallets),'Saldo financeiro dos clientes')+
+      kpi('Pedidos totais',hasOrders?num(total):'0','Todos os estados')+
+      kpi('Aparelhos online',online==null?'Não comunicado':num(online),(devices==null?'—':num(devices))+' aparelhos associados')+
+      kpi('Produtos activos',count(d.products,'enabled')==null?'Não comunicado':num(d.products.enabled),'Catálogo comercial')+
+      kpi('Grupos activos',count(d.groups,'enabled')==null?'Não comunicado':num(d.groups.enabled),'Grupos habilitados')+
+      kpi('Pedidos concluídos',num(count(orders,'completed')??0),'Operações finalizadas')+
+      kpi('Pedidos com falha',num(count(orders,'failed')??0),'Necessitam de atenção')+
+      kpi('Em verificação',num(count(orders,'unknown')??0),'Não repetir sem confirmação');
+    $('orderSummary').innerHTML=Object.entries(orders).length
+      ?Object.entries(orders).map(([k,v])=>summaryRow('▤',stateLabel(k),num(v)+' pedido(s)')).join('')
+      :'<div class="empty-data">Ainda não existem pedidos registados.</div>';
+    const sub=d.subscription||{};
+    const expiry=sub.expiresAt||sub.expires_at||null;
+    $('sideSub').textContent=sub.active===true?'Activa':sub.active===false?'Inactiva':'Não comunicado';
+    $('sideExpiry').textContent=expiry?'Validade: '+dateFmt(expiry):'Validade não comunicada';
+    const wa=d.whatsapp||{};
+    const waState=wa.status||wa.state||'Não comunicado';
+    $('operationSummary').innerHTML=
+      summaryRow('▣','Aparelhos',(online??'—')+' online de '+(devices??'—')+' associados')+
+      summaryRow('◉','WhatsApp',waState)+
+      summaryRow('◇','Assinatura',expiry?'Válida até '+dateFmt(expiry):'Data não comunicada');
+  }catch(e){
+    fail('dashboardKpis',errorMessage(e));
+    $('orderSummary').innerHTML='';
+    $('operationSummary').innerHTML='';
+  }
+}
+
+async function loadDevices(){
+  busy('devicesArea');
+  try{
+    const j=await api('/devices');
+    const list=j.devices||j.dispositivos||[];
+    if(!Array.isArray(list))throw Error('Formato de aparelhos inesperado.');
+    if(!list.length){busy('devicesArea','Ainda não há aparelhos associados à tua conta.');return;}
+    $('devicesArea').innerHTML=list.map(d=>{
+      const online=d.online===true,enabled=d.enabled??d.ativo;
+      return '<div class="device"><div class="device-top"><div class="device-symbol">▣</div><span class="status '+(online?'ok':'wait')+'">'+(online?'Online':'Estado não confirmado')+'</span></div><h3>'+safe(d.nome||d.label||'Aparelho Android')+'</h3><p>Executor associado à tua conta</p><div class="device-meta"><div><span>ID do aparelho</span><b>'+safe(String(d.uuid||d.id||'—').slice(0,18))+'</b></div><div><span>Autorizado</span><b>'+(d.aprovado===true||d.approved===true?'Sim':'Não confirmado')+'</b></div><div><span>Activado</span><b>'+(enabled===true?'Sim':enabled===false?'Não':'Não comunicado')+'</b></div></div></div>';
+    }).join('');
+  }catch(e){fail('devicesArea',errorMessage(e));}
+}
+
+async function createActivation(){
+  if(!confirm('Gerar um código temporário para associar uma APK à tua conta?'))return;
+  const block=$('activationResult');
+  block.style.display='none';
+  try{
+    const j=await api('/devices/activation-code','POST',{});
+    const code=j.codigoAtivacao||j.code;
+    if(!code)throw Error('Servidor não devolveu código de activação.');
+    currentActivation=String(code);
+    $('activationCode').textContent=code;
+    $('activationExpiry').textContent='Válido durante '+(j.validadeMinutos||15)+' minutos. Uso único.';
+    block.style.display='block';
+  }catch(e){toast(errorMessage(e));}
+}
+async function copyCode(){
+  if(!currentActivation)return;
+  try{await navigator.clipboard.writeText(currentActivation);toast('Código copiado.');}
+  catch{toast('Selecciona o código para o copiar.');}
+}
+
+async function loadProducts(){
+  busy('productsArea');
+  try{
+    const j=await api('/app/products');
+    const list=j.products||[];
+    window.catalogCache=list;
+    if(!Array.isArray(list))throw Error('Formato de produtos inesperado.');
+    if(!list.length){busy('productsArea','Ainda não existem produtos disponíveis no catálogo.');return;}
+    $('productsArea').innerHTML=list.map((p,idx)=>'<div class="product"><div class="product-icon">▦</div><h3>'+safe(p.type||'Pacote')+' · '+safe(p.quantityMB==null?'—':num(p.quantityMB)+' MB')+'</h3><p>Grupo: '+safe(p.groupJid||'Não comunicado')+'</p><div class="price">'+safe(p.priceCents==null?'Não comunicado':money(p.priceCents))+'</div><div class="device-meta"><div><span>Estado</span><b>'+(p.enabled?'Activo':'Inactivo')+'</b></div><div><span>ID</span><b>'+safe(String(p.id||'').slice(0,20))+'</b></div></div><button class="btn small product-edit" data-product-index="'+idx+'">Editar preço / estado</button></div>').join('');
+  }catch(e){fail('productsArea',errorMessage(e));}
+}
+async function loadGroups(){
+  busy('groupsArea');
+  try{
+    const j=await api('/groups');
+    const list=j.groups||[];
+    if(!Array.isArray(list))throw Error('Formato dos grupos inesperado.');
+    if(!list.length){busy('groupsArea','Não há grupos configurados nesta conta.');return;}
+    $('groupsArea').innerHTML=list.map(g=>'<div class="group-row"><div><b>'+safe(g.name||g.subject||'Grupo WhatsApp')+'</b><div class="muted" style="margin-top:5px;font-size:10px">'+safe(g.groupJid||g.jid||'ID não comunicado')+'</div></div><span class="status '+(g.enabled===true?'ok':'wait')+'">'+(g.enabled===true?'Activo':g.enabled===false?'Desactivado':'Estado não comunicado')+'</span></div>').join('');
+  }catch(e){fail('groupsArea',errorMessage(e));}
+}
+
+async function loadWhatsApp(){
+  busy('whatsappArea');
+  try{
+    let w=dashboard?.whatsapp;
+    if(!w){const j=await api('/api/v4/dashboard');w=j.whatsapp||{};}
+    const status=text(w.status||w.state||'Não comunicado');
+    $('whatsappArea').innerHTML=summaryRow('◉','Ligação do WhatsApp',status)+summaryRow('▦','Grupos comerciais','Consulta os grupos na secção Grupos.');
+  }catch(e){fail('whatsappArea',errorMessage(e));}
+}
+async function loadSubscription(){
+  busy('subscriptionArea');
+  try{
+    const j=await api('/api/v4/subscription');
+    const s=j.subscription||j;
+    const active=s.active??s.ativo;
+    const expiry=s.expiresAt||s.expires_at||j.expiraEm;
+    $('subscriptionArea').innerHTML=
+      summaryRow('◇','Estado da assinatura',active===true?'Activa':active===false?'Inactiva':'Não comunicado')+
+      summaryRow('◷','Validade',expiry?dateFmt(expiry):'Não comunicada')+
+      '<div class="stat-note" style="margin-top:18px">Pagamentos e renovações só serão activados depois de confirmar o contrato e os mecanismos de pagamento existentes no servidor.</div>';
+  }catch(e){fail('subscriptionArea',errorMessage(e));}
+}
+
+async function connectWhatsApp(){
+  const phone=$('waPhone').value.replace(/\D/g,'');
+  if(!/^258\d{9}$/.test(phone)){$('waConnectResult').textContent='Introduz o número moçambicano com prefixo 258.';return;}
+  if(!confirm('Iniciar a ligação do WhatsApp '+phone+' à tua conta?'))return;
+  const el=$('waConnectResult');
+  el.textContent='A iniciar ligação…';
+  try{
+    const j=await api('/whatsapp/connect','POST',{phone});
+    el.textContent=j.message||j.mensagem||'Pedido de ligação aceite. Consulta o emparelhamento.';
+    await loadPairing();
+  }catch(e){el.textContent=errorMessage(e);}
+}
+async function loadPairing(){
+  const el=$('pairingArea');
+  el.textContent='A consultar o emparelhamento…';
+  try{
+    const j=await api('/whatsapp/pairing');
+    const code=j.code||j.pairingCode||j.codigo||null;
+    const state=j.status||j.state||j.estado||null;
+    el.innerHTML=(state?summaryRow('◉','Estado',String(state)):'')+(code?summaryRow('▤','Código comunicado pelo servidor',String(code)):'')||'Ainda não há código de emparelhamento disponível. Consulta novamente mais tarde.';
+  }catch(e){el.textContent=errorMessage(e);}
+}
+async function disconnectWhatsApp(){
+  if(!confirm('Tens a certeza que desejas desassociar a sessão WhatsApp desta conta?'))return;
+  try{await api('/whatsapp/disconnect','POST',{});toast('Pedido de desassociação aceite pelo servidor.');await loadWhatsApp();}
+  catch(e){toast(errorMessage(e));}
+}
+
+let ordersCache=[];
+async function loadOrders(){
+  busy('ordersArea');
+  try{
+    const j=await api('/orders');
+    const list=j.orders||j.pedidos||[];
+    if(!Array.isArray(list))throw Error('Formato de pedidos inesperado.');
+    ordersCache=list;
+    renderOrdersTable();
+  }catch(e){fail('ordersArea',errorMessage(e));}
+}
+function renderOrdersTable(){
+  const area=$('ordersArea');
+  const f=$('orderStatusFilter')?.value||'all',q=($('orderSearchText')?.value||'').trim().toLowerCase();
+  const list=ordersCache.filter(o=>(f==='all'||o.status===f)&&[o.id,o.destination,o.numero,o.pedidoId].join(' ').toLowerCase().includes(q));
+  if(!list.length){area.className='empty-data';area.textContent='Nenhum pedido corresponde à pesquisa.';return;}
+  area.className='table-wrap';
+  const rows=list.map(o=>'<tr><td>'+safe(String(o.id||o.pedidoId||'—').slice(0,18))+'</td><td>'+safe(o.destination||o.numero||'—')+'</td><td>'+safe(o.quantityMB??o.quantity_mb??o.quantidadeMB??'—')+' MB</td><td>'+safe(stateLabel(o.status||o.estado))+'</td><td>'+safe(o.createdAt?dateFmt(o.createdAt):o.created_at?dateFmt(o.created_at):'—')+'</td></tr>').join('');
+  area.innerHTML='<table><thead><tr><th>Referência</th><th>Destinatário</th><th>Quantidade</th><th>Situação</th><th>Data</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+function exportOrdersCsv(){
+  if(!ordersCache.length){toast('Não há pedidos para exportar.');return;}
+  const cols=['Referência','Destino','Quantidade MB','Estado','Data'];
+  const rows=ordersCache.map(o=>[o.id||o.pedidoId||'',o.destination||o.numero||'',o.quantity_mb??o.quantityMB??o.quantidadeMB??'',stateLabel(o.status||o.estado),o.created_at||o.createdAt||'']);
+  const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
+  const csv='\ufeff'+[cols,...rows].map(r=>r.map(quote).join(';')).join('\r\n');
+  const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  const a=document.createElement('a');
+  a.href=u;a.download='itachi-pedidos.csv';a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
+
+let editingProduct=null;
+function editProduct(p){
+  if(!p||!p.id){toast('Este produto não tem identificação válida.');return;}
+  editingProduct=p;
+  $('editProductPanel').style.display='block';
+  $('editProductName').textContent=(p.type||'Pacote')+' · '+num(p.quantityMB)+' MB';
+  $('editProductPrice').value=(Number(p.priceCents)/100).toFixed(2);
+  $('editProductEnabled').value=String(Boolean(p.enabled));
+  $('editProductMsg').textContent='';
+  $('editProductPanel').scrollIntoView({behavior:'smooth',block:'center'});
+}
+async function saveProduct(){
+  if(!editingProduct)return;
+  const raw=$('editProductPrice').value.replace(',','.').trim();
+  if(!/^\d+(?:\.\d{1,2})?$/.test(raw)){toast('Introduz um preço válido em MT, com até duas casas decimais.');return;}
+  const cents=Math.round(Number(raw)*100);
+  if(!Number.isSafeInteger(cents)||cents<=0||cents>1000000000){toast('Preço fora dos limites permitidos.');return;}
+  const enabled=$('editProductEnabled').value==='true';
+  if(!confirm('Confirmas a alteração do preço para '+(cents/100).toFixed(2)+' MT e estado '+(enabled?'activo':'inactivo')+'?'))return;
+  try{
+    await api('/app/products/'+encodeURIComponent(editingProduct.id),'PATCH',{priceCents:cents,enabled});
+    $('editProductPanel').style.display='none';
+    toast('Produto actualizado pelo servidor.');
+    await loadProducts();
+  }catch(e){$('editProductMsg').textContent=errorMessage(e);}
+}
+
+function walletJid(v){
+  const t=String(v||'').trim();
+  if(!t||t.length>200||/[\s?#&]/.test(t))throw Error('Introduz o identificador completo e válido do cliente.');
+  return t;
+}
+async function lookupWallet(){
+  const el=$('walletArea');
+  el.textContent='A consultar…';
+  try{
+    const jid=walletJid($('walletJid').value);
+    const j=await api('/wallet?customerJid='+encodeURIComponent(jid));
+    el.innerHTML=summaryRow('₥','Saldo do cliente',money(j.balanceCents));
+  }catch(e){el.textContent=errorMessage(e);}
+}
+async function creditWallet(){
+  const el=$('creditArea');
+  try{
+    const customerJid=walletJid($('creditJid').value),provider=$('creditProvider').value,reference=$('creditRef').value.trim();
+    if(reference.length<4)throw Error('Introduz uma referência de pagamento válida.');
+    if(!confirm('Verificar esta referência no servidor e, se aprovada, creditar a carteira do cliente?'))return;
+    el.textContent='A confirmar pagamento…';
+    await api('/wallet/redeem','POST',{customerJid,provider,reference});
+    el.textContent='Pagamento aceite e carteira actualizada pelo servidor.';
+  }catch(e){el.textContent=errorMessage(e);}
+}
+
+let serverPlans=[];
+async function loadPlans(){
+  busy('plansArea');
+  try{
+    const j=await api('/app/subscription/plans');
+    serverPlans=Array.isArray(j.plans)?j.plans:Array.isArray(j.planos)?j.planos:[];
+    if(!serverPlans.length){
+      $('plansArea').innerHTML='<div class="empty-data">O servidor não devolveu planos activos.</div>';
+      return;
+    }
+    $('plansArea').innerHTML=serverPlans.map((p,idx)=>{
+      const priceCents=
+        p.priceCents!=null?Number(p.priceCents):
+        p.precoCents!=null?Number(p.precoCents):
+        p.price!=null?Math.round(Number(p.price)*100):
+        p.preco!=null?Math.round(Number(p.preco)*100):0;
+      const days=Number(p.days??p.dias??0);
+      const name=p.name||p.nome||(days?days+' dias':'Plano');
+      const featured=idx===0;
+      return '<div class="plan'+(featured?' featured':'')+'">'
+        +(featured?'<span class="ribbon">RECOMENDADO</span>':'')
+        +'<h3>'+safe(name)+'</h3>'
+        +'<p>Assinatura comercial ITACHI BOT PRO.</p>'
+        +'<div class="price">'+safe(money(priceCents))+'<small> / '+(days||'—')+' dias</small></div>'
+        +'<div class="features">'
+          +'<span>Gestão de grupos e catálogo</span>'
+          +'<span>Execução em aparelhos autorizados</span>'
+          +'<span>Dashboard e relatórios</span>'
+        +'</div>'
+        +'<button class="btn primary" onclick="navigate(\'payments\')">Preparar pagamento</button>'
+        +'</div>';
+    }).join('');
+  }catch(e){fail('plansArea',errorMessage(e));}
+}
+
+async function loadPayments(){
+  busy('checkoutPlanArea','A consultar planos…');
+  busy('paymentHistory','A consultar histórico…');
+  try{
+    const j=await api('/app/subscription/plans');
+    const list=Array.isArray(j.plans)?j.plans:Array.isArray(j.planos)?j.planos:[];
+    const p=list[0]||{};
+    const priceCents=
+      p.priceCents!=null?Number(p.priceCents):
+      p.precoCents!=null?Number(p.precoCents):
+      p.price!=null?Math.round(Number(p.price)*100):
+      p.preco!=null?Math.round(Number(p.preco)*100):0;
+    const days=Number(p.days??p.dias??0);
+    const name=p.name||p.nome||(days?days+' dias':'Plano');
+    $('checkoutPlanArea').innerHTML=
+      '<div class="portal-metric">'+safe(money(priceCents))+'</div>'+
+      '<div class="portal-hint">'+safe(name)+' · '+(days||'—')+' dias</div>';
+    window.checkoutPlan=p;
+  }catch(e){$('checkoutPlanArea').textContent=errorMessage(e);}
+  try{
+    const h=await api('/app/subscription/history');
+    const list=Array.isArray(h.payments)?h.payments:
+      Array.isArray(h.history)?h.history:
+      Array.isArray(h.pagamentos)?h.pagamentos:
+      Array.isArray(h)?h:[];
+    if(!list.length){
+      $('paymentHistory').innerHTML='<div class="empty-data">Sem pagamentos registados.</div>';
+      return;
+    }
+    $('paymentHistory').innerHTML='<div class="table-wrap"><table>'
+      +'<thead><tr><th>Data</th><th>Método</th><th>Referência</th><th>Estado</th><th>Valor</th></tr></thead><tbody>'
+      +list.map(p=>'<tr>'
+        +'<td>'+safe(p.createdAt?dateFmt(p.createdAt):p.created_at?dateFmt(p.created_at):p.data?dateFmt(p.data):'—')+'</td>'
+        +'<td>'+safe(p.provider||p.provedor||p.metodo||'—')+'</td>'
+        +'<td>'+safe(p.reference||p.referencia||p.ref||'—')+'</td>'
+        +'<td>'+safe(p.status||p.estado||'—')+'</td>'
+        +'<td>'+safe(p.amountCents!=null?money(p.amountCents):p.valorCents!=null?money(p.valorCents):p.amount!=null?money(Math.round(p.amount*100)):'—')+'</td>'
+        +'</tr>').join('')
+      +'</tbody></table></div>';
+  }catch(e){$('paymentHistory').textContent=errorMessage(e);}
+}
+
+async function createCheckout(){
+  const el=$('checkoutArea');
+  if(!confirm('Preparar pagamento da assinatura?'))return;
+  el.textContent='A preparar…';
+  try{
+    const provider=$('checkoutProvider').value;
+    const j=await api('/app/subscription/checkout','POST',{provider});
+    const ref=j.reference||j.referencia||j.checkoutId||j.providerReference||'';
+    const instructions=j.instructions||j.instrucoes||j.paymentInstructions||j.instrucoesPagamento||null;
+    const amountCents=j.amountCents??j.valorCents??null;
+    el.innerHTML=
+      summaryRow('▤','Referência',ref||'Não comunicada')+
+      (amountCents!=null?summaryRow('₥','Valor',money(amountCents)):'')+
+      (instructions?summaryRow('◇','Instruções do provedor',String(instructions)):'')+
+      '<div class="portal-hint">Efectua o pagamento no telemóvel e depois usa a caixa "Consultar confirmação" com a referência.</div>';
+  }catch(e){el.textContent=errorMessage(e);}
+}
+
+async function verifyPayment(){
+  const el=$('paymentResult');
+  el.textContent='A consultar o servidor…';
+  try{
+    const provider=$('verifyProvider').value;
+    const reference=$('verifyRef').value.trim();
+    if(reference.length<4)throw new Error('Introduz a referência do pagamento.');
+    const j=await api('/app/subscription/payment-status?provider='+encodeURIComponent(provider)+'&reference='+encodeURIComponent(reference));
+    const status=j.status||j.estado||j.state||'—';
+    const active=j.active===true||j.ativo===true||status==='active'||status==='confirmed'||status==='paid'||status==='pago';
+    el.innerHTML=
+      summaryRow('◈','Estado',String(status))
+      +(j.expiresAt?summaryRow('◷','Nova validade',dateFmt(j.expiresAt)):'')
+      +(j.message||j.mensagem?summaryRow('▦','Detalhe',String(j.message||j.mensagem)):'');
+    if(active){
+      await loadSubscription();
+      await loadDashboard();
+      toast('Assinatura activada pelo servidor.');
+    }
+  }catch(e){el.textContent=errorMessage(e);}
+}
+
+async function loadReports(){
+  busy('reportsKpis');
+  busy('reportsOrders','A consultar o servidor…');
+  try{
+    const d=await api('/api/v4/dashboard');
+    const orders=d.orders||{};
+    const total=Object.values(orders).reduce((a,b)=>a+(Number(b)||0),0);
+    $('reportsKpis').innerHTML=
+      kpi('Pedidos totais',num(total),'Todos os estados')+
+      kpi('Concluídos',num(Number(orders.completed)||0),'Finalizados')+
+      kpi('Com falha',num(Number(orders.failed)||0),'Necessitam revisão')+
+      kpi('Em verificação',num(Number(orders.unknown)||0),'Não repetir sem confirmação');
+    $('reportsOrders').innerHTML=Object.keys(orders).length
+      ?Object.entries(orders).map(([k,v])=>summaryRow('▤',stateLabel(k),num(v)+' pedido(s)')).join('')
+      :'<div class="empty-data">Ainda não existem pedidos registados.</div>';
+  }catch(e){
+    fail('reportsKpis',errorMessage(e));
+    $('reportsOrders').textContent=errorMessage(e);
+  }
+}
+
+async function loadAccount(){
+  const area=$('accountArea');
+  area.textContent='A consultar o servidor…';
+  try{
+    const me=await api('/me');
+    const acc=await api('/app/account');
+    const sub=me.subscription||acc.subscription||{};
+    const active=sub.active===true;
+    const expiry=sub.expiresAt||sub.expires_at||acc.expiresAt||null;
+    const phone=acc.phone||acc.numero||me.phone||'—';
+    const devices=acc.devicesCount??acc.devices??acc.dispositivos??'—';
+    const name=acc.name||acc.nome||'Comerciante';
+    area.innerHTML=
+      summaryRow('◈','Número da conta',String(phone))+
+      summaryRow('◇','Assinatura',active?'Activa':'Inactiva')+
+      summaryRow('◷','Validade',expiry?dateFmt(expiry):'Não comunicada')+
+      summaryRow('▣','Aparelhos associados',String(devices));
+    $('sideSub').textContent=active?'Activa':'Inactiva';
+    $('sideExpiry').textContent=expiry?'Validade: '+dateFmt(expiry):'Validade não comunicada';
+    $('merchantName').textContent=String(name);
+  }catch(e){area.textContent=errorMessage(e);}
+}
+
+async function changePin(){
+  const el=$('pinResult');
+  const oldPin=$('oldPin').value;
+  const newPin=$('newPin').value;
+  const confirmNewPin=$('confirmNewPin').value;
+  if(oldPin.length<4){el.textContent='Introduz o PIN actual.';return;}
+  if(newPin.length<4){el.textContent='O novo PIN deve ter pelo menos 4 dígitos.';return;}
+  if(newPin!==confirmNewPin){el.textContent='A confirmação não coincide com o novo PIN.';return;}
+  if(!confirm('Confirmas a alteração do PIN?'))return;
+  el.textContent='A guardar…';
+  try{
+    await api('/app/security/change-pin','POST',{oldPin,newPin});
+    el.textContent='PIN alterado pelo servidor.';
+    $('oldPin').value='';
+    $('newPin').value='';
+    $('confirmNewPin').value='';
+  }catch(e){el.textContent=errorMessage(e);}
+}
+
+let toastTimer=null;
+function toast(msg){
+  const el=$('toast');
+  if(!el)return;
+  el.textContent=String(msg||'');
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),4500);
+}
+
+// Delegação para os botões "Editar preço / estado" gerados em loadProducts()
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.product-edit');
+  if(!btn)return;
+  const idx=Number(btn.dataset.productIndex);
+  const list=window.catalogCache||[];
+  if(list[idx])editProduct(list[idx]);
+});
+</script>
+</body>
+</html>
