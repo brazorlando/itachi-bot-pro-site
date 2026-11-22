@@ -564,6 +564,28 @@ tbody tr:hover{background:#151922}
     <div><div class="eyebrow">Bot comercial</div><h1>Estado do WhatsApp</h1><p>Sessão associada à tua conta.</p></div>
     <button class="btn" onclick="loadWhatsApp()">↻ Actualizar</button>
   </div>
+
+  <!-- ===== CARD DO CÓDIGO DE EMPARELHAMENTO ===== -->
+  <div id="pairingCard" class="card" style="display:none;border-color:var(--gold);background:linear-gradient(160deg,#1d1a12,#14161f)">
+    <div style="text-align:center">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--gold);font-weight:800;margin-bottom:10px">
+        Código de emparelhamento
+      </div>
+      <div id="pairingCodeBig" class="mono" style="font-size:34px;font-weight:700;color:var(--gold);letter-spacing:.18em;margin:8px 0 14px;user-select:all;-webkit-user-select:all">
+        ········
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn primary" onclick="copyPairingCode()">📋 Copiar código</button>
+        <button class="btn ghost" onclick="loadPairing()">↻ Actualizar</button>
+      </div>
+      <div id="pairingHelp" class="portal-hint" style="margin-top:16px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto">
+        <b>No telemóvel:</b><br>
+        WhatsApp → <b>Definições</b> → <b>Dispositivos ligados</b> → <b>Ligar dispositivo</b> → <b>Ligar com número de telefone</b> → introduz o código acima.
+      </div>
+      <div id="pairingTimer" class="muted mono" style="font-size:11px;margin-top:10px"></div>
+    </div>
+  </div>
+
   <div class="portal-split">
     <div class="card">
       <div class="card-title">Estado e emparelhamento</div>
@@ -577,13 +599,15 @@ tbody tr:hover{background:#151922}
     <div class="card">
       <div class="card-title">Associar WhatsApp</div>
       <p class="portal-hint">Introduz o número autorizado. O servidor inicia a associação.</p>
-      <label class="portal-field">Número WhatsApp<input id="waPhone" inputmode="tel" placeholder="25884xxxxxxx" autocomplete="tel"></label>
+      <label class="portal-field">Número WhatsApp
+        <input id="waPhone" inputmode="tel" placeholder="25884xxxxxxx" autocomplete="tel">
+      </label>
       <div class="portal-actions"><button class="btn primary" onclick="connectWhatsApp()">Iniciar ligação</button></div>
       <div id="waConnectResult" class="portal-output"></div>
     </div>
   </div>
 </section>
-
+  
 <!-- ============ ASSINATURA ============ -->
 <section class="page" id="page-subscription">
   <div class="welcome">
