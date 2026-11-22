@@ -1,233 +1,737 @@
 <!DOCTYPE html>
-<html lang="pt-MZ"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f"><title>ITACHI BOT PRO | Painel do Comerciante</title><style>
+<html lang="pt-MZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0d12">
+<title>ITACHI BOT PRO · Portal do Comerciante</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
 :root{
-  --bg:#07111f;--sidebar:#0a1728;--panel:#101f33;--panel2:#132640;--line:#203a57;
-  --text:#edf5ff;--muted:#91a8c2;--accent:#35c7e8;--accent2:#1688bd;
-  --green:#35d6a0;--orange:#ffad70;--red:#ff7c7c;--purple:#b18aff;
-  --shadow:0 18px 50px rgba(0,0,0,.22);--radius:18px;
+  --bg:#0b0d12;--bg-elev:#10131b;--panel:#14161f;--panel-2:#1b1f2b;
+  --border:#242a3b;--border-strong:#353c52;
+  --text:#eef2fb;--text-soft:#c8cfe0;--muted:#7e88a3;
+  --gold:#f8b962;--gold-soft:#f8b9621a;
+  --blue:#6aa3ff;--blue-soft:#6aa3ff1a;
+  --mint:#4ed9a4;--mint-soft:#4ed9a41a;
+  --violet:#a98bff;--violet-soft:#a98bff1a;
+  --rose:#ff7a8a;--rose-soft:#ff7a8a1a;
+  --amber:#ffb454;--amber-soft:#ffb4541a;
+  --shadow:0 20px 60px rgba(0,0,0,.5);
+  --radius:16px;--radius-sm:11px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-button,input,select{font:inherit}
-button{cursor:pointer}
-.app{display:flex;min-height:100vh}
-.sidebar{width:258px;position:fixed;inset:0 auto 0 0;background:var(--sidebar);border-right:1px solid var(--line);padding:24px 16px;display:flex;flex-direction:column;z-index:30;transition:.25s}
-.brand{display:flex;align-items:center;gap:11px;padding:0 8px 24px;border-bottom:1px solid var(--line)}
-.brand-mark{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#1764a2);display:grid;place-items:center;color:#031321;font-weight:950;font-size:19px;box-shadow:0 8px 24px #20b9df33}
-.brand-name{font-weight:900;letter-spacing:.4px;font-size:15px}.brand-sub{font-size:10px;color:var(--accent);letter-spacing:2px;margin-top:3px;font-weight:800}
-.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#617b99;font-weight:800;padding:22px 10px 9px}
-.nav{display:grid;gap:5px}
-.nav button{border:1px solid transparent;background:transparent;color:var(--muted);display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;text-align:left;font-size:13px;font-weight:650;transition:.18s}
-.nav button:hover{background:var(--panel);color:var(--text)}
-.nav button.active{background:linear-gradient(110deg,#123b5b,#102b48);border-color:#23638a;color:white}
-.nav .ico{width:20px;text-align:center;font-size:16px;color:var(--accent)}
-.nav .count{margin-left:auto;font-size:10px;background:#773d4a;color:#ffd5d5;padding:3px 7px;border-radius:20px}
-.sidebar-bottom{margin-top:auto;border-top:1px solid var(--line);padding:16px 8px 0}
-.plan-mini{background:linear-gradient(135deg,#123d5b,#10243d);border:1px solid #27658a;border-radius:15px;padding:14px;margin-bottom:14px}
-.plan-mini small{display:block;color:#9fc6df;font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:800}
-.plan-mini strong{display:block;font-size:17px;margin:5px 0}
-.plan-mini span{font-size:11px;color:#9fc6df}
-.sidebar-foot{font-size:10px;color:#627b98;line-height:1.6}
-.main{margin-left:258px;width:calc(100% - 258px);min-height:100vh}
-.topbar{height:78px;display:flex;align-items:center;justify-content:space-between;padding:0 34px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent);position:sticky;top:0;z-index:20;backdrop-filter:blur(16px)}
-.top-left{display:flex;align-items:center;gap:14px}.menu-btn{display:none}
-.breadcrumb{font-size:11px;color:var(--muted);margin-bottom:3px}.page-title{font-size:18px;font-weight:850;letter-spacing:-.3px}
-.top-actions{display:flex;align-items:center;gap:10px}
-.icon-btn{width:39px;height:39px;border:1px solid var(--line);background:var(--panel);border-radius:12px;color:var(--muted);font-size:16px;position:relative}
-.dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--red);right:8px;top:7px;border:1px solid var(--panel)}
-.profile{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:6px 11px 6px 6px}
-.avatar{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#0d8cb9,#5bd9e9);display:grid;place-items:center;color:#052035;font-weight:900;font-size:12px}
-.profile strong{display:block;font-size:12px}.profile small{display:block;font-size:10px;color:var(--muted);margin-top:2px}
-.content{padding:28px 34px 50px;max-width:1600px;margin:auto}
-.page{display:none;animation:appear .2s ease}.page.active{display:block}
-@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.welcome{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px;flex-wrap:wrap}
-.eyebrow{color:var(--accent);font-size:10px;font-weight:850;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:8px}
-h1{font-size:27px;letter-spacing:-.8px;margin-bottom:7px}.welcome p{font-size:13px;color:var(--muted)}
-.btn{border:1px solid var(--line);border-radius:11px;padding:10px 15px;background:var(--panel2);color:var(--text);font-size:12px;font-weight:750;transition:.18s}
-.btn:hover{transform:translateY(-1px);border-color:var(--accent)}
-.btn.primary{background:linear-gradient(135deg,#1388b8,#12618e);border-color:#36c8e5;color:white;box-shadow:0 8px 22px #0c8eb533}
-.btn.green{background:linear-gradient(135deg,#0e8b69,#09664f);border-color:#39d9a4;color:white}
-.btn.ghost{background:transparent;color:var(--muted)}
-.btn.danger{background:#4b202b;border-color:#8d3e4d;color:#ffc4c4}
-.btn.small{padding:7px 10px;font-size:10px;border-radius:9px}
-.grid{display:grid;gap:15px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
-.kpi,.card{background:linear-gradient(145deg,var(--panel),color-mix(in srgb,var(--panel) 78%,var(--bg)));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-.kpi{padding:18px;position:relative;overflow:hidden}
-.kpi:after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;background:var(--glow,#1ba5ce18);right:-34px;top:-40px}
-.kpi-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px;font-weight:700}
-.kpi-icon{width:32px;height:32px;border-radius:10px;background:#1e536a55;color:var(--accent);display:grid;place-items:center;font-size:15px}
-.kpi-value{font-size:25px;font-weight:900;letter-spacing:-.8px;margin:14px 0 5px}
-.kpi-foot{font-size:10px;color:var(--muted)}.up{color:var(--green);font-weight:800}
-.two-col{grid-template-columns:1.5fr 1fr;margin-bottom:16px}
-.card{padding:20px;margin-bottom:16px}
-.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.card-title{font-size:13px;font-weight:850}.card-sub{font-size:10px;color:var(--muted);margin-top:4px}
-.link{color:var(--accent);font-size:11px;font-weight:750;text-decoration:none}
-.chart{height:190px;display:flex;align-items:flex-end;gap:12px;padding:10px 5px 0;border-bottom:1px solid var(--line)}
-.bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px}
-.bar{width:min(30px,75%);height:var(--h);border-radius:7px 7px 2px 2px;background:linear-gradient(180deg,#4ed5e9,#176a9d);position:relative;min-height:5px}
-.bar.alt{background:linear-gradient(180deg,#49d7a6,#138465)}
-.bar-label{font-size:9px;color:var(--muted)}.bar-num{font-size:10px;font-weight:800}
-.legend{display:flex;gap:15px;flex-wrap:wrap;margin-top:14px;font-size:10px;color:var(--muted)}
-.legend i{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:5px;background:var(--accent)}
-.donut-row{display:flex;align-items:center;justify-content:center;gap:25px;min-height:170px;flex-wrap:wrap}
-.donut{width:142px;height:142px;border-radius:50%;background:conic-gradient(var(--green) 0 72%,var(--orange) 72% 85%,var(--red) 85% 93%,var(--accent) 93% 100%);display:grid;place-items:center}
-.donut-hole{width:100px;height:100px;border-radius:50%;background:var(--panel);display:grid;place-content:center;text-align:center}
-.donut-hole strong{font-size:25px}.donut-hole small{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-.legend-list{display:grid;gap:10px;font-size:11px}.legend-list span{color:var(--muted);margin-left:5px}
-.table-wrap{overflow:auto}
-table{width:100%;border-collapse:collapse;min-width:620px}
-th{text-align:left;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px;padding:11px 10px;border-bottom:1px solid var(--line)}
-td{padding:13px 10px;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);font-size:11px}
-tr:last-child td{border-bottom:0}tbody tr:hover{background:#ffffff06}
-.status{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:30px;font-size:9px;font-weight:850;white-space:nowrap}
-.status:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
-.status.ok{color:var(--green);background:#35d6a018}.status.wait{color:var(--orange);background:#ffad7018}.status.fail{color:var(--red);background:#ff7c7c18}.status.info{color:var(--accent);background:#35c7e818}
-.money{font-weight:850}.muted{color:var(--muted)}
-.quick-grid{grid-template-columns:repeat(4,1fr)}
-.quick{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:15px;text-align:left;color:var(--text);transition:.18s}
-.quick:hover{border-color:var(--accent);transform:translateY(-2px)}
-.quick b{display:block;font-size:12px;margin:9px 0 4px}.quick small{color:var(--muted);font-size:10px}.quick .qico{font-size:20px;color:var(--accent)}
-.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
-.field{display:grid;gap:6px;margin-bottom:14px}.field label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.8px}
-.field input,.field select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 12px;outline:none;font-size:12px}
-.field input:focus,.field select:focus{border-color:var(--accent)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.device-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-.device{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:17px}
-.device-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.device-symbol{width:42px;height:42px;border-radius:13px;background:#1b5c7755;color:var(--accent);display:grid;place-items:center;font-size:19px}
-.device h3{font-size:13px;margin-top:13px}.device p{font-size:10px;color:var(--muted);margin-top:4px}
-.device-meta{display:grid;gap:8px;margin-top:15px;padding-top:13px;border-top:1px solid var(--line);font-size:10px}
-.device-meta div{display:flex;justify-content:space-between;gap:10px}.device-meta span:first-child{color:var(--muted)}
-.product-grid,.plans{grid-template-columns:repeat(3,minmax(0,1fr))}
-.product,.plan{border:1px solid var(--line);background:var(--panel);border-radius:17px;padding:19px;position:relative}
-.product-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#1b5c7755;color:var(--accent);font-size:19px;margin-bottom:15px}
-.product h3,.plan h3{font-size:14px}.product p,.plan p{font-size:10px;color:var(--muted);line-height:1.6;margin:7px 0 14px}
-.price{font-size:24px;font-weight:900;letter-spacing:-.8px}.price small{font-size:10px;color:var(--muted);font-weight:600}
-.plan.featured{border-color:var(--accent);box-shadow:0 0 0 1px #35c7e833,0 18px 40px #0002}
-.ribbon{position:absolute;right:14px;top:14px;background:#1b7798;color:white;border-radius:20px;padding:5px 8px;font-size:8px;font-weight:900}
-.features{display:grid;gap:8px;margin:15px 0;font-size:10px;color:var(--muted)}.features span:before{content:"✓";color:var(--green);font-weight:900;margin-right:7px}
-.notice{padding:13px 15px;border-radius:12px;background:#12374c;border:1px solid #28617a;color:#bfeeff;font-size:11px;line-height:1.6;margin-bottom:15px}
-.activity{display:grid;gap:12px}.activity-item{display:flex;gap:11px;align-items:flex-start}.activity-icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:#1c5c7355;color:var(--accent);flex-shrink:0}.activity-item b{font-size:11px;display:block}.activity-item small{font-size:10px;color:var(--muted);display:block;margin-top:3px}
-.settings-grid{grid-template-columns:1fr 1fr}
-.theme-options{display:flex;gap:10px;flex-wrap:wrap}
-.theme-choice{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 13px;font-size:11px}
-.theme-choice.active{border-color:var(--accent);box-shadow:0 0 0 2px #35c7e822}
-.overlay{display:none;position:fixed;inset:0;background:#0009;z-index:80;align-items:center;justify-content:center;padding:18px}
-.overlay.show{display:flex}
-.modal{width:min(460px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 30px 90px #0009}
-.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h2{font-size:17px}.close{border:0;background:transparent;color:var(--muted);font-size:22px}
-.toast{position:fixed;right:20px;bottom:20px;background:var(--panel2);border:1px solid var(--accent);padding:13px 17px;border-radius:12px;box-shadow:var(--shadow);font-size:12px;z-index:100;display:none}
-.toast.show{display:block;animation:appear .2s}
-.mobile-overlay{display:none}
-body.light{--bg:#f2f6fb;--sidebar:#fff;--panel:#fff;--panel2:#edf4fa;--line:#dbe5ef;--text:#16283d;--muted:#657a91;--shadow:0 10px 30px #203a5710}
-body.light .topbar{background:#ffffffdf}
-body.light .nav button.active{background:#e4f5fb;color:#12364b}
-body.light .bar{box-shadow:0 0 0 1px #00000008}
-body.midnight{--bg:#030711;--sidebar:#060c18;--panel:#0b1424;--panel2:#101d31;--line:#182b45;--accent:#8b9dff;--accent2:#5264c9}
-body.midnight .nav button.active{background:#171e43;border-color:#424f9c}
-@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.device-grid,.product-grid,.plans{grid-template-columns:repeat(2,1fr)}.quick-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:760px){
- .sidebar{transform:translateX(-100%);width:275px}.sidebar.open{transform:translateX(0);box-shadow:20px 0 50px #0008}
- .mobile-overlay.show{display:block;position:fixed;inset:0;background:#0008;z-index:25}
- .main{margin-left:0;width:100%}.topbar{height:68px;padding:0 15px}.menu-btn{display:inline-grid;place-items:center;width:36px;height:36px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px}
- .profile .profile-text{display:none}.content{padding:21px 15px 40px}h1{font-size:23px}.kpis{gap:9px}.kpi{padding:13px}.kpi-value{font-size:21px}.two-col,.settings-grid{grid-template-columns:1fr}.device-grid,.product-grid,.plans{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(2,1fr)}
- .form-grid{grid-template-columns:1fr}.top-actions{gap:6px}.top-actions .icon-btn{width:35px;height:35px}
+html,body{height:100%}
+body{
+  font-family:'Manrope',ui-sans-serif,system-ui,sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
 }
-@media(max-width:380px){.kpis{grid-template-columns:1fr 1fr}.quick-grid{grid-template-columns:1fr 1fr}.kpi-value{font-size:19px}}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(248,185,98,.07),transparent 42%),
+    radial-gradient(circle at 85% 55%,rgba(169,139,255,.06),transparent 42%),
+    radial-gradient(circle at 50% 100%,rgba(106,163,255,.05),transparent 40%);
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+input,select{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 12px;outline:0;width:100%;color:var(--text);transition:.18s}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(248,185,98,.1)}
+input::placeholder{color:#4a5468}
+h1,h2,h3{font-family:'Fraunces',ui-serif,serif;font-weight:500;letter-spacing:-.02em}
+h1{font-size:34px;line-height:1.1;margin-bottom:6px}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
 
-body:not(.logged) .app{display:none}body.logged #loginScreen{display:none}
-#loginScreen{position:fixed;inset:0;z-index:110;display:grid;place-items:center;background:radial-gradient(ellipse at 35% 10%,#123e58 0,var(--bg) 65%);padding:18px;overflow:auto}
-.auth-card{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);padding:29px;border-radius:24px;box-shadow:var(--shadow)}.auth-card h1{margin-top:24px}.auth-card p{line-height:1.6}
-.auth-switch{display:flex;gap:7px;margin:20px 0}.auth-switch button{flex:1}.auth-switch .current{border-color:var(--accent);color:var(--accent)}
-.auth-error{color:var(--red);font-size:12px;line-height:1.5;margin:10px 0;min-height:20px}
-.load{display:none;color:var(--accent);font-size:12px;margin:10px 0}.empty-data{padding:25px 16px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7}
-.skeleton{color:var(--muted)}.stat-note{background:var(--panel);padding:13px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:11px;line-height:1.65;margin-bottom:18px}
-.group-row{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:14px 0;font-size:12px}.group-row:last-child{border:0}
-#activationResult{border:1px dashed var(--accent);border-radius:14px;padding:16px;margin-top:13px;display:none}.activation-code{font-size:24px;font-weight:900;letter-spacing:1.3px;overflow-wrap:anywhere;color:var(--accent);margin:10px 0}
-.login-brand{font-weight:900;font-size:22px;letter-spacing:-.5px}.login-brand b{color:var(--accent)}
-@media(max-width:760px){.auth-card{padding:22px}.activation-code{font-size:19px}}
+/* ============ LOGIN ============ */
+#loginScreen{
+  position:fixed;inset:0;z-index:110;display:grid;place-items:center;
+  background:radial-gradient(ellipse at 30% 0%,#131a2c 0,var(--bg) 60%);
+  padding:20px;overflow-y:auto;
+}
+body.logged #loginScreen{display:none}
+body:not(.logged) .app{display:none}
+.login-wrap{width:min(460px,100%);position:relative;z-index:1}
+.login-card{
+  background:linear-gradient(160deg,rgba(28,32,45,.9),rgba(20,22,31,.85));
+  border:1px solid var(--border);border-radius:24px;padding:36px 34px;
+  box-shadow:var(--shadow);backdrop-filter:blur(20px);
+}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.login-brand .mark{
+  width:44px;height:44px;border-radius:13px;
+  background:linear-gradient(135deg,var(--gold),#e89b3c);
+  display:grid;place-items:center;color:#1a1205;font-weight:900;font-size:20px;
+  font-family:'Fraunces',serif;
+}
+.login-brand .name{font-family:'Fraunces',serif;font-weight:600;font-size:20px;letter-spacing:-.02em}
+.login-brand .name b{color:var(--gold);font-weight:600}
+.login-brand .sub{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:2px;font-weight:700}
+.login-h1{font-family:'Fraunces',serif;font-size:30px;font-weight:500;line-height:1.15;margin-bottom:6px}
+.login-sub{color:var(--muted);font-size:13px;margin-bottom:24px}
 
-/* Portal comercial V2: formulários e respostas em linguagem clara */
-.portal-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:12px 0}
-.portal-field{display:grid;gap:7px;font-size:12px;color:var(--muted)}
-.portal-field input,.portal-field select{width:100%;background:#081526;border:1px solid #284463;border-radius:11px;color:#eaf5ff;padding:12px;outline:0}
-.portal-field input:focus,.portal-field select:focus{border-color:#35c7e8}
-.portal-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
-.portal-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border-bottom:1px solid var(--line)}
-.portal-row:last-child{border-bottom:0}
-.portal-row b{font-size:13px}.portal-row small{color:var(--muted);font-size:11px}
-.portal-hint{font-size:12px;color:var(--muted);line-height:1.6;margin:12px 0}
-.portal-metric{font-size:26px;font-weight:900;letter-spacing:-.6px;margin:8px 0}
-.portal-note{border:1px solid #2f6a7e;background:#153249;color:#d3eef8;padding:13px;border-radius:12px;font-size:12px;margin:12px 0;line-height:1.55}
-.portal-pill{display:inline-block;padding:5px 9px;border-radius:99px;font-size:11px;font-weight:750;background:#164d52;color:#60e0ae}
-.portal-pill.off{background:#483129;color:#ffbf8d}
-.portal-subtitle{font-size:12px;color:var(--muted);margin:6px 0 16px}
-.portal-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
-.portal-output{margin-top:14px;color:var(--text);font-size:12px}
-.portal-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
-.portal-login-warning{font-size:11px;color:#ffb7a8;line-height:1.5;margin-top:12px}
-</style></head><body>
-<div id="loginScreen"><div class="auth-card"><div class="login-brand">ITACHI <b>BOT PRO</b></div><p class="muted" style="font-size:12px;margin-top:6px">Portal do comerciante · gestão da conta e dos pedidos</p><div class="auth-switch"><button class="btn current" id="loginTab" onclick="setAuthMode('login')">Entrar</button><button class="btn" id="registerTab" onclick="setAuthMode('register')">Criar conta</button></div><form id="authForm"><div class="field" id="nameField" hidden><label>Nome completo</label><input id="authName" autocomplete="name" maxlength="80"></div><div class="field"><label>Número moçambicano</label><input id="authPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="84 123 4567" required></div><div class="field"><label>PIN da conta</label><input id="authPin" type="password" inputmode="numeric" autocomplete="current-password" minlength="4" maxlength="16" required></div><div class="field" id="confirmField" hidden><label>Confirmar PIN</label><input id="authConfirm" type="password" inputmode="numeric" maxlength="16"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary" id="authSubmit" type="submit" style="width:100%">Entrar no painel</button></form><div style="margin-top:17px;border-top:1px solid var(--line);padding-top:14px"><button type="button" class="btn" onclick="testConnection()" style="width:100%">◉ Verificar ligação ao servidor (sem PIN)</button><div id="connectionReport" role="status" style="font-size:11px;line-height:1.65;margin-top:11px;color:var(--muted)">Versão de ligação: 22NOV-HTTP3 · API através de /backend</div></div><p class="muted" style="font-size:10px;margin-top:15px">Portal na Vercel; servidor CyberHost por proxy. Os dados da API não são simulados.</p></div></div>
-<div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar(false)"></div><div class="app"><aside class="sidebar" id="sidebar"><div class="brand"><div class="brand-mark">I</div><div><div class="brand-name">ITACHI BOT PRO</div><div class="brand-sub">PAINEL DO COMERCIANTE</div></div></div>
-<div class="nav-label">Gestão</div><nav class="nav"><button data-page="dashboard" class="active"><span class="ico">◈</span> Dashboard</button><button data-page="orders"><span class="ico">▤</span> Pedidos</button><button data-page="devices"><span class="ico">▣</span> Aparelhos e activação</button><button data-page="products"><span class="ico">▦</span> Produtos</button><button data-page="groups"><span class="ico">◎</span> Grupos</button><button data-page="whatsapp"><span class="ico">◉</span> WhatsApp</button><button data-page="subscription"><span class="ico">◇</span> Assinatura</button></nav>
-<div class="nav-label">Comercial e financeiro</div><nav class="nav"><button data-page="wallet"><span class="ico">₥</span> Carteiras dos clientes</button><button data-page="plans"><span class="ico">◇</span> Planos e compras</button><button data-page="payments"><span class="ico">▣</span> Pagamentos e renovação</button><button data-page="reports"><span class="ico">▥</span> Relatórios</button><button data-page="settings"><span class="ico">⚙</span> Conta e segurança</button></nav><div class="sidebar-bottom"><div class="plan-mini"><small>Assinatura da conta</small><strong id="sideSub">A consultar…</strong><span id="sideExpiry">—</span></div><button class="btn ghost" onclick="logout()" style="width:100%">Terminar sessão</button><div class="sidebar-foot" style="margin-top:12px">O site gere o negócio. A APK recebe e executa tarefas autorizadas.</div></div></aside>
-<main class="main"><header class="topbar"><div class="top-left"><button class="menu-btn" onclick="toggleSidebar()">☰</button><div><div class="breadcrumb">ITACHI BOT PRO / Portal comercial</div><div class="page-title" id="topTitle">Dashboard</div></div></div><div class="top-actions"><button class="icon-btn" onclick="refreshCurrent()" aria-label="Actualizar">↻</button><div class="profile"><div class="avatar">IT</div><div class="profile-text"><strong id="merchantName">Comerciante</strong><small id="merchantPhone">Conta autenticada</small></div></div></div></header><div class="content">
-<section class="page active" id="page-dashboard"><div class="welcome"><div><div class="eyebrow">VISÃO GERAL</div><h1>Painel comercial</h1><p>Indicadores comunicados pelo servidor da tua conta.</p></div><button class="btn primary" onclick="refreshCurrent()">↻ Actualizar dados</button></div><div class="stat-note">O saldo financeiro das carteiras dos clientes é diferente do saldo de megas dos cartões SIM. Dados ausentes aparecem como “Não comunicado”.</div><div class="grid kpis" id="dashboardKpis"></div><div class="grid two-col"><div class="card"><div class="card-head"><div><div class="card-title">Situação dos pedidos</div><div class="card-sub">Contagens reais por estado</div></div></div><div id="orderSummary" class="activity"></div></div><div class="card"><div class="card-head"><div><div class="card-title">Estado da operação</div><div class="card-sub">Aparelhos, WhatsApp e assinatura</div></div></div><div class="activity" id="operationSummary"></div></div></div></section>
-<section class="page" id="page-orders"><div class="welcome"><div><div class="eyebrow">PEDIDOS</div><h1>Pedidos dos clientes</h1><p>Consulta apenas, sem enviar novas operações.</p></div><button class="btn" onclick="loadOrders()">↻ Actualizar</button></div><div class="portal-toolbar"><label class="portal-field">Filtrar por estado<select id="orderStatusFilter" onchange="renderOrdersTable()"><option value="all">Todos os estados</option><option value="queued">A aguardar</option><option value="assigned">Em execução</option><option value="completed">Concluídos</option><option value="failed">Falhas</option><option value="unknown">Em verificação</option></select></label><label class="portal-field">Pesquisar por referência ou destino<input id="orderSearchText" placeholder="Número ou referência" oninput="renderOrdersTable()"></label><button class="btn" onclick="exportOrdersCsv()">Exportar CSV</button></div><div class="card"><div id="ordersArea" class="empty-data">A consultar pedidos…</div></div></section>
-<section class="page" id="page-devices"><div class="welcome"><div><div class="eyebrow">EXECUTORES ANDROID</div><h1>Aparelhos e activação</h1><p>Associa novos aparelhos à tua conta e acompanha os já registados.</p></div><button class="btn primary" onclick="createActivation()">＋ Gerar código para APK</button></div><div class="notice">O código é emitido pelo servidor, é temporário e deve ser introduzido na APK. Nunca partilhes o código com pessoas desconhecidas.</div><div id="activationResult"><div style="font-size:12px;color:var(--muted)">Código de activação gerado pelo servidor</div><div class="activation-code" id="activationCode"></div><p class="muted" id="activationExpiry" style="font-size:11px;margin-bottom:11px"></p><button class="btn small" onclick="copyCode()">Copiar código</button></div><div class="grid device-grid" id="devicesArea"></div></section>
-<section class="page" id="page-products"><div class="welcome"><div><div class="eyebrow">CATÁLOGO</div><h1>Produtos e pacotes</h1><p>Produtos registados para os grupos comerciais da tua conta.</p></div><button class="btn" onclick="loadProducts()">↻ Actualizar</button></div><div class="grid product-grid" id="productsArea"></div><div id="editProductPanel" class="card" style="display:none"><div class="card-title">Editar produto seleccionado</div><div id="editProductName" class="portal-hint"></div><div class="portal-form"><label class="portal-field">Preço em meticais (MT)<input id="editProductPrice" inputmode="decimal" placeholder="Ex.: 150,00"></label><label class="portal-field">Disponibilidade<select id="editProductEnabled"><option value="true">Activo</option><option value="false">Inactivo</option></select></label></div><div class="portal-actions"><button class="btn primary" onclick="saveProduct()">Guardar no servidor</button><button class="btn" onclick="document.getElementById('editProductPanel').style.display='none'">Cancelar</button></div><div id="editProductMsg" class="portal-output"></div></div></section>
-<section class="page" id="page-groups"><div class="welcome"><div><div class="eyebrow">WHATSAPP</div><h1>Grupos comerciais</h1><p>Lista de grupos configurados no servidor.</p></div><button class="btn" onclick="loadGroups()">↻ Actualizar</button></div><div class="card" id="groupsArea"></div></section>
-<section class="page" id="page-whatsapp"><div class="welcome"><div><div class="eyebrow">BOT COMERCIAL</div><h1>Estado do WhatsApp</h1><p>Informações da sessão associada à tua conta.</p></div><button class="btn" onclick="loadWhatsApp()">↻ Actualizar</button></div><div class="portal-split"><div class="card"><div class="card-title">Estado e emparelhamento</div><div id="whatsappArea"></div><div id="pairingArea" class="portal-output"></div><div class="portal-actions"><button class="btn" onclick="loadPairing()">Consultar emparelhamento</button><button class="btn danger" onclick="disconnectWhatsApp()">Desassociar sessão</button></div></div><div class="card"><div class="card-title">Associar WhatsApp</div><p class="portal-hint">Introduz o número WhatsApp autorizado. O servidor inicia a associação; os passos de emparelhamento são fornecidos pela API.</p><label class="portal-field">Número de WhatsApp<input id="waPhone" inputmode="tel" placeholder="25884xxxxxxx" autocomplete="tel"></label><div class="portal-actions"><button class="btn primary" onclick="connectWhatsApp()">Iniciar ligação</button></div><div id="waConnectResult" class="portal-output"></div></div></div></section>
-<section class="page" id="page-subscription"><div class="welcome"><div><div class="eyebrow">CONTA</div><h1>Assinatura</h1><p>Consulta a validade da tua licença comercial.</p></div><button class="btn" onclick="loadSubscription()">↻ Actualizar</button></div><div class="card" id="subscriptionArea"></div></section>
+.auth-tabs{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:4px;
+  background:var(--bg-elev);border:1px solid var(--border);border-radius:13px;
+  padding:5px;margin-bottom:22px;
+}
+.auth-tabs button{
+  padding:9px 8px;border-radius:9px;font-size:12px;font-weight:700;
+  color:var(--muted);transition:.18s;text-align:center;
+}
+.auth-tabs button.current{color:var(--text);background:var(--panel-2);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.auth-tabs button[data-mode="login"].current{color:var(--blue)}
+.auth-tabs button[data-mode="register"].current{color:var(--mint)}
+.auth-tabs button[data-mode="admin"].current{color:var(--gold)}
 
-<section class="page" id="page-wallet"><div class="welcome"><div><div class="eyebrow">FINANCEIRO DOS CLIENTES</div><h1>Carteiras e saldos</h1><p>Consulta o saldo de um cliente da tua conta. Não é saldo em megas das SIMs.</p></div></div>
-<div class="card"><div class="card-title">Consultar cliente</div><div class="portal-form"><label class="portal-field">Identificador WhatsApp do cliente (JID)<input id="walletJid" placeholder="25884xxxxxxx@s.whatsapp.net" autocomplete="off"></label></div><button class="btn primary" onclick="lookupWallet()">Consultar saldo</button><div id="walletArea" class="portal-output"></div></div>
-<div class="card"><div class="card-title">Crédito por comprovativo verificado</div><div class="portal-note">Este movimento credita a carteira do cliente, não a assinatura do comerciante. A referência deve estar previamente confirmada pelo sistema. Não creditamos valores por simples declaração do comerciante.</div><div class="portal-form"><label class="portal-field">Identificador do cliente<input id="creditJid" placeholder="25884xxxxxxx@s.whatsapp.net"></label><label class="portal-field">Provedor<select id="creditProvider"><option value="mpesa">M-Pesa</option><option value="emola">e-Mola</option></select></label><label class="portal-field">Referência verificada<input id="creditRef" placeholder="Referência do pagamento" autocomplete="off"></label></div><button class="btn" onclick="creditWallet()">Verificar e creditar carteira</button><div id="creditArea" class="portal-output"></div></div></section>
-<section class="page" id="page-plans"><div class="welcome"><div><div class="eyebrow">SUBSCRIÇÃO</div><h1>Planos de assinatura</h1><p>Valores fornecidos pelo servidor. Sem preços de demonstração.</p></div><button class="btn" onclick="loadPlans()">↻ Actualizar planos</button></div><div id="plansArea" class="grid product-grid"></div><div class="portal-note">A activação depende de confirmação do pagamento. O site não activa uma assinatura por conta própria.</div></section>
-<section class="page" id="page-payments"><div class="welcome"><div><div class="eyebrow">PAGAMENTOS DA CONTA</div><h1>Renovar assinatura</h1><p>Comprar uma assinatura é diferente de carregar a carteira financeira de um cliente.</p></div></div>
-<div class="portal-split"><div class="card"><div class="card-title">Emitir instruções de pagamento</div><div id="checkoutPlanArea" class="portal-output"></div><div class="portal-form"><label class="portal-field">Método<select id="checkoutProvider"><option value="mpesa">M-Pesa</option><option value="emola">e-Mola</option></select></label></div><button class="btn primary" onclick="createCheckout()">Preparar pagamento</button><div id="checkoutArea" class="portal-output"></div></div>
-<div class="card"><div class="card-title">Consultar confirmação</div><div class="portal-form"><label class="portal-field">Método<select id="verifyProvider"><option value="mpesa">M-Pesa</option><option value="emola">e-Mola</option></select></label><label class="portal-field">Referência da transacção<input id="verifyRef" placeholder="Referência recebida"></label></div><button class="btn" onclick="verifyPayment()">Consultar pagamento</button><div id="paymentResult" class="portal-output"></div></div></div>
-<div class="card"><div class="card-title">Histórico de pagamentos da assinatura</div><div id="paymentHistory" class="portal-output">A consultar…</div></div></section>
-<section class="page" id="page-reports"><div class="welcome"><div><div class="eyebrow">RELATÓRIOS</div><h1>Desempenho e pedidos</h1><p>Números reais disponíveis no Dashboard; valores de receita só aparecem quando a API os fornecer.</p></div><button class="btn" onclick="exportOrdersCsv()">↓ Exportar pedidos CSV</button></div><div class="grid kpis" id="reportsKpis"></div><div class="card"><div class="card-title">Pedidos por estado</div><div id="reportsOrders" class="portal-output"></div></div><div class="portal-note">Receita, margem, lucro e volume transferido não são calculados a partir do saldo das carteiras. Esses indicadores exigem dados adicionais do servidor.</div></section>
-<section class="page" id="page-settings"><div class="welcome"><div><div class="eyebrow">CONTA E SEGURANÇA</div><h1>Definições</h1><p>Consulta o perfil e actualiza o PIN de acesso com confirmação do servidor.</p></div></div>
-<div class="portal-split"><div class="card"><div class="card-title">Dados da conta</div><div id="accountArea" class="portal-output">A consultar…</div><div class="portal-actions"><button class="btn" onclick="loadAccount()">Actualizar conta</button><button class="btn" onclick="logout()">Terminar sessão</button></div></div>
-<div class="card"><div class="card-title">Alterar PIN</div><div class="portal-form"><label class="portal-field">PIN actual<input id="oldPin" type="password" inputmode="numeric" maxlength="20" autocomplete="current-password"></label><label class="portal-field">Novo PIN<input id="newPin" type="password" inputmode="numeric" maxlength="20" autocomplete="new-password"></label><label class="portal-field">Confirmar novo PIN<input id="confirmNewPin" type="password" inputmode="numeric" maxlength="20" autocomplete="new-password"></label></div><button class="btn primary" onclick="changePin()">Guardar novo PIN</button><div id="pinResult" class="portal-output"></div></div></div>
-<div class="portal-note">Este portal utiliza a sessão do comerciante para gerir dados. Aviso: o acesso entre a Vercel e o CyberHost utiliza HTTP e não protege PINs ou tokens nesse trajecto. O servidor deve separar credenciais web e permissões do executor Android.</div></section>
-</div></main></div><div class="toast" id="toast" role="status"></div>
+.field{display:grid;gap:7px;margin-bottom:14px}
+.field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.field small{font-size:11px;color:var(--muted);line-height:1.4;margin-top:2px}
+.btn{
+  border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 16px;
+  background:var(--panel-2);color:var(--text);font-size:13px;font-weight:700;
+  transition:.18s;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--border-strong)}
+.btn.primary{background:linear-gradient(135deg,var(--gold),#e09538);border-color:transparent;color:#1a1205;box-shadow:0 8px 22px rgba(248,185,98,.25)}
+.btn.primary:hover{box-shadow:0 10px 28px rgba(248,185,98,.35)}
+.btn.blue{background:linear-gradient(135deg,var(--blue),#4f85e0);border-color:transparent;color:#08152e}
+.btn.green{background:linear-gradient(135deg,var(--mint),#2fb98a);border-color:transparent;color:#051e14}
+.btn.danger{background:var(--rose-soft);border-color:var(--rose);color:var(--rose)}
+.btn.ghost{background:transparent}
+.btn.small{padding:7px 11px;font-size:11px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.auth-error{font-size:12px;line-height:1.5;margin:4px 0 10px;min-height:18px;color:var(--rose)}
+.auth-foot{border-top:1px solid var(--border);margin-top:22px;padding-top:16px}
+.auth-foot .btn{width:100%}
+.conn{font-size:11px;line-height:1.6;margin-top:10px;color:var(--muted)}
+.auth-note{font-size:10px;color:var(--muted);margin-top:14px;line-height:1.5}
+
+/* ============ APP SHELL ============ */
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+.sidebar{
+  width:264px;position:fixed;inset:0 auto 0 0;z-index:30;
+  background:linear-gradient(180deg,#0d1018,#0a0c13);
+  border-right:1px solid var(--border);
+  padding:22px 14px 20px;display:flex;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:#242a3b transparent;
+  transition:transform .25s;
+}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{background:#242a3b;border-radius:3px}
+.sidebar::-webkit-scrollbar-thumb:hover{background:#353c52}
+.sb-brand{display:flex;align-items:center;gap:11px;padding:4px 8px 22px;border-bottom:1px solid var(--border);margin-bottom:4px;flex-shrink:0}
+.sb-brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--gold),#e89b3c);display:grid;place-items:center;color:#1a1205;font-family:'Fraunces',serif;font-weight:600;font-size:17px}
+.sb-brand .name{font-family:'Fraunces',serif;font-weight:600;font-size:15px;letter-spacing:-.01em}
+.sb-brand .sub{font-size:9px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase;font-weight:800;margin-top:2px}
+.sb-label{font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#556179;padding:20px 10px 8px}
+.sb-nav{display:grid;gap:3px}
+.sb-nav button{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;
+  border-radius:10px;font-size:12.5px;font-weight:600;
+  color:var(--text-soft);text-align:left;transition:.14s;
+  border:1px solid transparent;
+}
+.sb-nav button:hover{background:var(--panel);color:var(--text)}
+.sb-nav button.active{
+  background:linear-gradient(90deg,var(--gold-soft),transparent 60%);
+  color:var(--gold);border-color:#f8b96233;
+}
+.sb-nav .ico{width:18px;text-align:center;font-size:14px;opacity:.8}
+.sb-nav button.active .ico{opacity:1}
+.sb-bottom{margin-top:auto;padding-top:20px;flex-shrink:0}
+.plan-mini{
+  background:linear-gradient(135deg,#1a1e2c,#141825);
+  border:1px solid var(--border-strong);border-radius:14px;padding:14px;margin-bottom:12px;
+}
+.plan-mini small{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.plan-mini strong{display:block;font-family:'Fraunces',serif;font-size:16px;font-weight:600;margin:5px 0 2px}
+.plan-mini span{font-size:11px;color:var(--text-soft)}
+.sb-foot{font-size:10px;color:#556179;line-height:1.6;padding:0 4px}
+
+.main{margin-left:264px;width:calc(100% - 264px);min-height:100vh}
+.topbar{
+  height:74px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;border-bottom:1px solid var(--border);
+  background:rgba(11,13,18,.85);position:sticky;top:0;z-index:20;
+  backdrop-filter:blur(16px);
+}
+.tb-left{display:flex;align-items:center;gap:14px}
+.menu-btn{display:none;width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--panel)}
+.crumb{font-size:11px;color:var(--muted);letter-spacing:.04em;margin-bottom:2px}
+.page-title{font-family:'Fraunces',serif;font-weight:600;font-size:17px;letter-spacing:-.01em}
+.tb-right{display:flex;align-items:center;gap:10px}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text-soft);font-size:15px;transition:.18s}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
+.profile{display:flex;align-items:center;gap:9px;border:1px solid var(--border);background:var(--panel);border-radius:11px;padding:5px 11px 5px 5px}
+.avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--gold),#e89b3c);display:grid;place-items:center;color:#1a1205;font-weight:800;font-size:11px;font-family:'Fraunces',serif}
+.profile-text strong{display:block;font-size:12px;font-weight:700}
+.profile-text small{display:block;font-size:10px;color:var(--muted)}
+
+.content{padding:32px;max-width:1500px;margin:auto}
+.page{display:none;animation:fadein .25s ease}
+.page.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.welcome{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:26px;flex-wrap:wrap}
+.welcome p{color:var(--muted);font-size:13px;max-width:560px}
+
+/* ============ CARDS / KPIs ============ */
+.card{
+  background:linear-gradient(160deg,var(--panel),#11141d);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.card + .card{margin-top:16px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.card-title{font-family:'Fraunces',serif;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.card-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,var(--panel),#11141d);
+  border:1px solid var(--border);border-radius:14px;padding:18px;
+  transition:.2s;
+}
+.kpi::before{
+  content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:2px;
+  background:var(--kpi-accent,var(--blue));
+}
+.kpi:hover{transform:translateY(-2px);border-color:var(--border-strong)}
+.kpi.gold{--kpi-accent:var(--gold)}.kpi.blue{--kpi-accent:var(--blue)}
+.kpi.mint{--kpi-accent:var(--mint)}.kpi.violet{--kpi-accent:var(--violet)}
+.kpi.rose{--kpi-accent:var(--rose)}.kpi.amber{--kpi-accent:var(--amber)}
+.kpi-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.kpi-icon{
+  width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
+  font-size:13px;color:var(--kpi-accent,var(--blue));
+  background:color-mix(in srgb,var(--kpi-accent,var(--blue)) 15%,transparent);
+}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;letter-spacing:-.02em;margin:12px 0 4px;color:var(--text)}
+.kpi-foot{font-size:11px;color:var(--muted)}
+
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.activity{display:grid;gap:12px}
+.activity-item{display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:10px;transition:.14s}
+.activity-item:hover{background:var(--panel-2)}
+.activity-icon{
+  width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
+  background:var(--gold-soft);color:var(--gold);flex-shrink:0;font-size:14px;
+}
+.activity-item b{display:block;font-size:12px;font-weight:700;margin-bottom:2px}
+.activity-item small{display:block;font-size:11px;color:var(--muted)}
+
+.stat-note{
+  background:var(--blue-soft);border:1px solid #6aa3ff33;color:#c9dcff;
+  padding:12px 14px;border-radius:11px;font-size:12px;line-height:1.6;margin-bottom:18px;
+}
+
+/* ============ TABLES ============ */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);background:var(--panel)}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800;padding:13px 14px;border-bottom:1px solid var(--border);background:#0e1118}
+td{padding:12px 14px;font-size:12px;border-bottom:1px solid #1a1e2a}
+tr:last-child td{border-bottom:0}
+tbody tr{transition:.14s}
+tbody tr:hover{background:#151922}
+
+.status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.status.ok{color:var(--mint);background:var(--mint-soft)}
+.status.wait{color:var(--amber);background:var(--amber-soft)}
+.status.fail{color:var(--rose);background:var(--rose-soft)}
+.status.info{color:var(--blue);background:var(--blue-soft)}
+
+.empty-data{padding:44px 20px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.7}
+
+/* ============ FORM / PORTAL ============ */
+.portal-toolbar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px}
+.portal-field{display:grid;gap:6px;font-size:11px;color:var(--muted);flex:1;min-width:180px}
+.portal-field label{font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.portal-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}
+.portal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.portal-output{margin-top:14px;font-size:12px;color:var(--text-soft)}
+.portal-hint{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0}
+.portal-note{
+  background:var(--gold-soft);border:1px solid #f8b96233;color:#f2d9ad;
+  padding:12px 14px;border-radius:11px;font-size:12px;line-height:1.55;margin:12px 0;
+}
+.portal-metric{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;letter-spacing:-.02em;margin:6px 0}
+.portal-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px}
+
+/* ============ DEVICES ============ */
+.device-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.device{background:linear-gradient(160deg,var(--panel),#11141d);border:1px solid var(--border);border-radius:14px;padding:18px;transition:.2s}
+.device:hover{border-color:var(--border-strong)}
+.device-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.device-symbol{width:38px;height:38px;border-radius:10px;background:var(--mint-soft);color:var(--mint);display:grid;place-items:center;font-size:17px}
+.device h3{font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;margin-top:12px}
+.device p{font-size:11px;color:var(--muted);margin-top:3px}
+.device-meta{display:grid;gap:7px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:11px}
+.device-meta div{display:flex;justify-content:space-between;gap:10px}
+.device-meta span:first-child{color:var(--muted)}
+.device-meta b{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500}
+
+/* ============ PRODUCTS ============ */
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.product{background:linear-gradient(160deg,var(--panel),#11141d);border:1px solid var(--border);border-radius:14px;padding:18px;transition:.2s;display:flex;flex-direction:column}
+.product:hover{border-color:var(--border-strong)}
+.product-icon{width:38px;height:38px;border-radius:10px;background:var(--violet-soft);color:var(--violet);display:grid;place-items:center;font-size:17px;margin-bottom:12px}
+.product h3{font-family:'Manrope',sans-serif;font-size:13px;font-weight:700}
+.product p{font-size:11px;color:var(--muted);margin:5px 0 12px;line-height:1.5}
+.price{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;letter-spacing:-.02em}
+.price small{font-family:'Manrope',sans-serif;font-size:10px;color:var(--muted);font-weight:600}
+
+/* ============ PLANS ============ */
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.plan{background:linear-gradient(160deg,var(--panel),#11141d);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative;transition:.2s}
+.plan:hover{border-color:var(--border-strong)}
+.plan.featured{border-color:var(--gold);box-shadow:0 0 0 1px #f8b96244,0 20px 40px rgba(0,0,0,.4)}
+.plan h3{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:4px}
+.plan p{font-size:11.5px;color:var(--muted);line-height:1.6;margin:4px 0 14px}
+.ribbon{position:absolute;right:14px;top:14px;background:var(--gold);color:#1a1205;border-radius:20px;padding:4px 9px;font-size:9px;font-weight:800;letter-spacing:.06em}
+.features{display:grid;gap:8px;margin:14px 0;font-size:11.5px;color:var(--text-soft)}
+.features span::before{content:"✓";color:var(--mint);font-weight:900;margin-right:7px}
+
+/* ============ GROUPS ============ */
+.group-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0;border-bottom:1px solid var(--border);font-size:12px}
+.group-row:last-child{border-bottom:0}
+.group-row b{font-weight:700}
+.group-row .mono{font-size:11px;color:var(--muted)}
+
+/* ============ ACTIVATION ============ */
+#activationResult{display:none;border:1px dashed var(--gold);border-radius:13px;padding:16px;margin-top:14px;background:var(--gold-soft)}
+.activation-code{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;letter-spacing:.08em;color:var(--gold);margin:10px 0;overflow-wrap:anywhere}
+
+/* ============ TOAST ============ */
+.toast{
+  position:fixed;right:20px;bottom:20px;padding:13px 17px;
+  background:var(--panel-2);border:1px solid var(--gold);border-radius:12px;
+  box-shadow:var(--shadow);font-size:12.5px;font-weight:600;z-index:100;display:none;max-width:340px;
+}
+.toast.show{display:block;animation:fadein .22s ease}
+
+/* ============ RESPONSIVE ============ */
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:25}
+@media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.device-grid,.product-grid,.plans-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .sidebar{transform:translateX(-100%);width:280px}
+  .sidebar.open{transform:translateX(0);box-shadow:20px 0 50px rgba(0,0,0,.6)}
+  .mobile-overlay.show{display:block}
+  .main{margin-left:0;width:100%}
+  .menu-btn{display:grid;place-items:center}
+  .topbar{height:64px;padding:0 16px}
+  .content{padding:20px 16px 40px}
+  h1{font-size:26px}
+  .kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi{padding:14px}
+  .kpi-value{font-size:19px}
+  .device-grid,.product-grid,.plans-grid{grid-template-columns:1fr}
+  .profile-text{display:none}
+  .login-card{padding:28px 22px}
+  .login-h1{font-size:26px}
+}
+@media(max-width:420px){.kpis{grid-template-columns:1fr}.auth-tabs{font-size:11px}}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginScreen"><div class="login-wrap"><div class="login-card">
+  <div class="login-brand">
+    <div class="mark">I</div>
+    <div>
+      <div class="name">ITACHI <b>BOT PRO</b></div>
+      <div class="sub">Portal do Comerciante</div>
+    </div>
+  </div>
+
+  <div id="loginHeading" class="login-h1">Bem-vindo de volta</div>
+  <div id="loginSub" class="login-sub">Entra na tua conta para gerir o negócio.</div>
+
+  <div class="auth-tabs">
+    <button class="current" id="loginTab" data-mode="login" onclick="setAuthMode('login')">Entrar</button>
+    <button id="registerTab" data-mode="register" onclick="setAuthMode('register')">Criar conta</button>
+    <button id="adminTab" data-mode="admin" onclick="setAuthMode('admin')">Admin</button>
+  </div>
+
+  <form id="authForm">
+    <div class="field" id="nameField" hidden>
+      <label>Nome completo</label>
+      <input id="authName" autocomplete="name" maxlength="80">
+    </div>
+    <div class="field" id="phoneField">
+      <label>Número moçambicano</label>
+      <input id="authPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="84 123 4567" required>
+    </div>
+    <div class="field" id="pinField">
+      <label>PIN da conta</label>
+      <input id="authPin" type="password" inputmode="numeric" autocomplete="current-password" minlength="4" maxlength="16" required>
+    </div>
+    <div class="field" id="confirmField" hidden>
+      <label>Confirmar PIN</label>
+      <input id="authConfirm" type="password" inputmode="numeric" maxlength="16">
+    </div>
+    <div class="field" id="adminKeyField" hidden>
+      <label>Chave administrativa</label>
+      <input id="adminKey" type="password" autocomplete="off" minlength="32" maxlength="200" placeholder="ITACHI_ADMIN_IMPORT_KEY">
+      <small>Apenas para o proprietário. É o valor de ITACHI_ADMIN_IMPORT_KEY no servidor (mín. 32 caracteres).</small>
+    </div>
+    <div class="auth-error" id="authError" role="alert"></div>
+    <button class="btn primary" id="authSubmit" type="submit" style="width:100%">Entrar no painel</button>
+  </form>
+
+  <div class="auth-foot">
+    <button type="button" class="btn ghost" onclick="testConnection()">◉ Verificar ligação ao servidor</button>
+    <div id="connectionReport" class="conn">API através de /backend · proxy Vercel → CyberHost.</div>
+    <div class="auth-note">Os dados da API não são simulados. Nunca partilhes PINs nem chaves.</div>
+  </div>
+</div></div></div>
+
+<!-- ================= APP ================= -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar(false)"></div>
+
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="mark">I</div>
+    <div>
+      <div class="name">ITACHI BOT PRO</div>
+      <div class="sub">Comerciante</div>
+    </div>
+  </div>
+
+  <div class="sb-label">Gestão</div>
+  <nav class="sb-nav">
+    <button data-page="dashboard" class="active"><span class="ico">◈</span> Dashboard</button>
+    <button data-page="orders"><span class="ico">▤</span> Pedidos</button>
+    <button data-page="devices"><span class="ico">▣</span> Aparelhos</button>
+    <button data-page="products"><span class="ico">▦</span> Produtos</button>
+    <button data-page="groups"><span class="ico">◎</span> Grupos</button>
+    <button data-page="whatsapp"><span class="ico">◉</span> WhatsApp</button>
+    <button data-page="subscription"><span class="ico">◇</span> Assinatura</button>
+  </nav>
+
+  <div class="sb-label">Comercial</div>
+  <nav class="sb-nav">
+    <button data-page="wallet"><span class="ico">₥</span> Carteiras</button>
+    <button data-page="plans"><span class="ico">◇</span> Planos</button>
+    <button data-page="payments"><span class="ico">▣</span> Pagamentos</button>
+    <button data-page="reports"><span class="ico">▥</span> Relatórios</button>
+    <button data-page="settings"><span class="ico">⚙</span> Conta e segurança</button>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="plan-mini">
+      <small>Assinatura</small>
+      <strong id="sideSub">A consultar…</strong>
+      <span id="sideExpiry">—</span>
+    </div>
+    <button class="btn ghost" onclick="logout()" style="width:100%">Terminar sessão</button>
+    <div class="sb-foot" style="margin-top:12px">A APK executa. O site gere.</div>
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="tb-left">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div>
+      <div class="crumb">ITACHI · Portal</div>
+      <div class="page-title" id="topTitle">Dashboard</div>
+    </div>
+  </div>
+  <div class="tb-right">
+    <button class="icon-btn" onclick="refreshCurrent()" aria-label="Actualizar">↻</button>
+    <div class="profile">
+      <div class="avatar">IT</div>
+      <div class="profile-text">
+        <strong id="merchantName">Comerciante</strong>
+        <small id="merchantPhone">Sessão activa</small>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- ============ DASHBOARD ============ -->
+<section class="page active" id="page-dashboard">
+  <div class="welcome">
+    <div>
+      <div class="eyebrow">Visão geral</div>
+      <h1>Painel comercial</h1>
+      <p>Indicadores reais enviados pelo servidor da tua conta.</p>
+    </div>
+    <button class="btn primary" onclick="refreshCurrent()">↻ Actualizar</button>
+  </div>
+  <div class="stat-note">O saldo financeiro das carteiras dos clientes <b>não</b> é o saldo de megas dos cartões SIM.</div>
+  <div class="kpis" id="dashboardKpis"></div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">Situação dos pedidos</div><div class="card-sub">Contagens por estado</div></div>
+      </div>
+      <div class="activity" id="orderSummary"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">Operação</div><div class="card-sub">Aparelhos, WhatsApp, assinatura</div></div>
+      </div>
+      <div class="activity" id="operationSummary"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PEDIDOS ============ -->
+<section class="page" id="page-orders">
+  <div class="welcome">
+    <div><div class="eyebrow">Pedidos</div><h1>Pedidos dos clientes</h1><p>Consulta apenas — sem enviar novas operações.</p></div>
+    <button class="btn" onclick="loadOrders()">↻ Actualizar</button>
+  </div>
+  <div class="portal-toolbar">
+    <label class="portal-field">Estado<select id="orderStatusFilter" onchange="renderOrdersTable()">
+      <option value="all">Todos</option>
+      <option value="queued">A aguardar</option>
+      <option value="assigned">Em execução</option>
+      <option value="completed">Concluídos</option>
+      <option value="failed">Falhas</option>
+      <option value="unknown">Em verificação</option>
+    </select></label>
+    <label class="portal-field">Pesquisar<input id="orderSearchText" placeholder="Referência ou número" oninput="renderOrdersTable()"></label>
+    <button class="btn" onclick="exportOrdersCsv()">Exportar CSV</button>
+  </div>
+  <div class="card"><div id="ordersArea" class="empty-data">A consultar pedidos…</div></div>
+</section>
+
+<!-- ============ APARELHOS ============ -->
+<section class="page" id="page-devices">
+  <div class="welcome">
+    <div><div class="eyebrow">Executores Android</div><h1>Aparelhos e activação</h1><p>Associa novos aparelhos à tua conta.</p></div>
+    <button class="btn primary" onclick="createActivation()">＋ Gerar código</button>
+  </div>
+  <div class="portal-note">O código é temporário e de uso único. Introduz na APK. Nunca partilhes com estranhos.</div>
+  <div id="activationResult">
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:700">Código de activação</div>
+    <div class="activation-code" id="activationCode"></div>
+    <p class="muted" id="activationExpiry" style="font-size:11px;margin-bottom:11px"></p>
+    <button class="btn small" onclick="copyCode()">Copiar código</button>
+  </div>
+  <div class="device-grid" id="devicesArea" style="margin-top:16px"></div>
+</section>
+
+<!-- ============ PRODUTOS ============ -->
+<section class="page" id="page-products">
+  <div class="welcome">
+    <div><div class="eyebrow">Catálogo</div><h1>Produtos e pacotes</h1><p>Produtos registados nos grupos da tua conta.</p></div>
+    <button class="btn" onclick="loadProducts()">↻ Actualizar</button>
+  </div>
+  <div class="product-grid" id="productsArea"></div>
+  <div id="editProductPanel" class="card" style="display:none;margin-top:16px">
+    <div class="card-title">Editar produto</div>
+    <div id="editProductName" class="portal-hint"></div>
+    <div class="portal-form">
+      <label class="portal-field">Preço (MT)<input id="editProductPrice" inputmode="decimal" placeholder="150,00"></label>
+      <label class="portal-field">Estado<select id="editProductEnabled"><option value="true">Activo</option><option value="false">Inactivo</option></select></label>
+    </div>
+    <div class="portal-actions">
+      <button class="btn primary" onclick="saveProduct()">Guardar</button>
+      <button class="btn ghost" onclick="document.getElementById('editProductPanel').style.display='none'">Cancelar</button>
+    </div>
+    <div id="editProductMsg" class="portal-output"></div>
+  </div>
+</section>
+
+<!-- ============ GRUPOS ============ -->
+<section class="page" id="page-groups">
+  <div class="welcome">
+    <div><div class="eyebrow">WhatsApp</div><h1>Grupos comerciais</h1><p>Grupos configurados no servidor.</p></div>
+    <button class="btn" onclick="loadGroups()">↻ Actualizar</button>
+  </div>
+  <div class="card" id="groupsArea"></div>
+</section>
+
+<!-- ============ WHATSAPP ============ -->
+<section class="page" id="page-whatsapp">
+  <div class="welcome">
+    <div><div class="eyebrow">Bot comercial</div><h1>Estado do WhatsApp</h1><p>Sessão associada à tua conta.</p></div>
+    <button class="btn" onclick="loadWhatsApp()">↻ Actualizar</button>
+  </div>
+  <div class="portal-split">
+    <div class="card">
+      <div class="card-title">Estado e emparelhamento</div>
+      <div id="whatsappArea"></div>
+      <div id="pairingArea" class="portal-output"></div>
+      <div class="portal-actions">
+        <button class="btn" onclick="loadPairing()">Consultar emparelhamento</button>
+        <button class="btn danger" onclick="disconnectWhatsApp()">Desassociar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Associar WhatsApp</div>
+      <p class="portal-hint">Introduz o número autorizado. O servidor inicia a associação.</p>
+      <label class="portal-field">Número WhatsApp<input id="waPhone" inputmode="tel" placeholder="25884xxxxxxx" autocomplete="tel"></label>
+      <div class="portal-actions"><button class="btn primary" onclick="connectWhatsApp()">Iniciar ligação</button></div>
+      <div id="waConnectResult" class="portal-output"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ASSINATURA ============ -->
+<section class="page" id="page-subscription">
+  <div class="welcome">
+    <div><div class="eyebrow">Conta</div><h1>Assinatura</h1><p>Validade da licença comercial.</p></div>
+    <button class="btn" onclick="loadSubscription()">↻ Actualizar</button>
+  </div>
+  <div class="card" id="subscriptionArea"></div>
+</section>
+
+<!-- ============ CARTEIRAS ============ -->
+<section class="page" id="page-wallet">
+  <div class="welcome">
+    <div><div class="eyebrow">Financeiro dos clientes</div><h1>Carteiras e saldos</h1><p>Saldo de um cliente. Não é o saldo de megas das SIMs.</p></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Consultar cliente</div>
+    <div class="portal-form"><label class="portal-field">JID do cliente<input id="walletJid" placeholder="25884xxxxxxx@s.whatsapp.net" autocomplete="off"></label></div>
+    <button class="btn primary" onclick="lookupWallet()">Consultar saldo</button>
+    <div id="walletArea" class="portal-output"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Crédito por comprovativo verificado</div>
+    <div class="portal-note">Credita a carteira do cliente, não a tua assinatura. A referência deve estar previamente confirmada pelo sistema.</div>
+    <div class="portal-form">
+      <label class="portal-field">JID do cliente<input id="creditJid" placeholder="25884xxxxxxx@s.whatsapp.net"></label>
+      <label class="portal-field">Provedor<select id="creditProvider"><option value="mpesa">M-Pesa</option><option value="emola">e-Mola</option></select></label>
+      <label class="portal-field">Referência<input id="creditRef" autocomplete="off"></label>
+    </div>
+    <button class="btn" onclick="creditWallet()">Verificar e creditar</button>
+    <div id="creditArea" class="portal-output"></div>
+  </div>
+</section>
+
+<!-- ============ PLANOS ============ -->
+<section class="page" id="page-plans">
+  <div class="welcome">
+    <div><div class="eyebrow">Subscrição</div><h1>Planos de assinatura</h1><p>Valores fornecidos pelo servidor.</p></div>
+    <button class="btn" onclick="loadPlans()">↻ Actualizar</button>
+  </div>
+  <div id="plansArea" class="plans-grid"></div>
+  <div class="portal-note">A activação depende de confirmação do pagamento. O site nunca activa uma assinatura por si.</div>
+</section>
+
+<!-- ============ PAGAMENTOS ============ -->
+<section class="page" id="page-payments">
+  <div class="welcome">
+    <div><div class="eyebrow">Pagamentos da conta</div><h1>Renovar assinatura</h1><p>Comprar assinatura é diferente de carregar carteira do cliente.</p></div>
+  </div>
+  <div class="portal-split">
+    <div class="card">
+      <div class="card-title">Emitir pagamento</div>
+      <div id="checkoutPlanArea" class="portal-output"></div>
+      <div class="portal-form">
+        <label class="portal-field">Método<select id="checkoutProvider"><option value="mpesa">M-Pesa</option><option value="emola">e-Mola</option></select></label>
+      </div>
+      <button class="btn primary" onclick="createCheckout()">Preparar pagamento</button>
+      <div id="checkoutArea" class="portal-output"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Consultar confirmação</div>
+      <div class="portal-form">
+        <label class="portal-field">Método<select id="verifyProvider"><option value="mpesa">M-Pesa</option><option value="emola">e-Mola</option></select></label>
+        <label class="portal-field">Referência<input id="verifyRef" placeholder="Referência recebida"></label>
+      </div>
+      <button class="btn" onclick="verifyPayment()">Consultar pagamento</button>
+      <div id="paymentResult" class="portal-output"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Histórico de pagamentos</div>
+    <div id="paymentHistory" class="portal-output">A consultar…</div>
+  </div>
+</section>
+
+<!-- ============ RELATÓRIOS ============ -->
+<section class="page" id="page-reports">
+  <div class="welcome">
+    <div><div class="eyebrow">Relatórios</div><h1>Desempenho</h1><p>Números reais. Valores de receita só aparecem quando a API os fornecer.</p></div>
+    <button class="btn" onclick="exportOrdersCsv()">↓ Exportar CSV</button>
+  </div>
+  <div class="kpis" id="reportsKpis"></div>
+  <div class="card">
+    <div class="card-title">Pedidos por estado</div>
+    <div id="reportsOrders" class="portal-output"></div>
+  </div>
+  <div class="portal-note">Receita, margem e lucro não são calculados a partir do saldo das carteiras.</div>
+</section>
+
+<!-- ============ CONTA / SEGURANÇA ============ -->
+<section class="page" id="page-settings">
+  <div class="welcome">
+    <div><div class="eyebrow">Conta e segurança</div><h1>Definições</h1><p>Consulta o perfil e actualiza o PIN.</p></div>
+  </div>
+  <div class="portal-split">
+    <div class="card">
+      <div class="card-title">Dados da conta</div>
+      <div id="accountArea" class="portal-output">A consultar…</div>
+      <div class="portal-actions">
+        <button class="btn" onclick="loadAccount()">Actualizar</button>
+        <button class="btn ghost" onclick="logout()">Terminar sessão</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Alterar PIN</div>
+      <div class="portal-form">
+        <label class="portal-field">PIN actual<input id="oldPin" type="password" inputmode="numeric" maxlength="20" autocomplete="current-password"></label>
+        <label class="portal-field">Novo PIN<input id="newPin" type="password" inputmode="numeric" maxlength="20" autocomplete="new-password"></label>
+        <label class="portal-field">Confirmar novo PIN<input id="confirmNewPin" type="password" inputmode="numeric" maxlength="20" autocomplete="new-password"></label>
+      </div>
+      <button class="btn primary" onclick="changePin()">Guardar novo PIN</button>
+      <div id="pinResult" class="portal-output"></div>
+    </div>
+  </div>
+  <div class="portal-note">O tráfego entre Vercel e CyberHost usa HTTP. O servidor deve separar credenciais web e permissões do executor Android.</div>
+</section>
+
+</div></main></div>
+
+<div class="toast" id="toast" role="status"></div>
+
 <script src="./config.js"></script>
 <script>
 'use strict';
-// Servir este ficheiro no mesmo domínio e porta da API.
-// Sem URLs externas arbitrárias, sem tokens em query strings.
 const API=String(window.ITACHI_API_URL||'').replace(/\/$/,'');
-let token='';
-let currentPage='dashboard';
-let authMode='login';
-let dashboard=null;
-let currentActivation='';
+let token='',currentPage='dashboard',authMode='login',dashboard=null,currentActivation='',ordersCache=[],editingProduct=null,serverPlans=[],toastTimer=null;
+
 const $=id=>document.getElementById(id);
-const fmtNumber=new Intl.NumberFormat('pt-MZ');
-const money=cents=>Number.isFinite(Number(cents))
-  ?new Intl.NumberFormat('pt-MZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(cents)/100)+' MT'
-  :'Não comunicado';
-const num=n=>Number.isFinite(Number(n))?fmtNumber.format(Number(n)):'Não comunicado';
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const text=s=>String(s??'').trim();
+const num=n=>Number.isFinite(Number(n))?new Intl.NumberFormat('pt-MZ').format(Number(n)):'Não comunicado';
+const money=cents=>Number.isFinite(Number(cents))?new Intl.NumberFormat('pt-MZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(cents)/100)+' MT':'Não comunicado';
+const phoneNormalize=v=>String(v).replace(/\D/g,'').replace(/^258/,'');
+const dateFmt=raw=>{const t=Date.parse(raw);return Number.isNaN(t)?String(raw).slice(0,10):new Intl.DateTimeFormat('pt-MZ',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(t));};
 
 function errorMessage(e){
   const msg=String(e?.message||'Erro de comunicação');
-  if(/Failed to fetch|NetworkError/i.test(msg))return 'Não foi possível alcançar a API através do proxy da Vercel. Utiliza o teste de ligação para identificar a falha.';
+  if(/Failed to fetch|NetworkError/i.test(msg))return 'Não foi possível alcançar a API através do proxy da Vercel. Usa "Verificar ligação".';
   return msg;
 }
-function busy(id,message='A consultar o servidor…'){
-  const el=$(id);
-  if(!el)return;
-  el.innerHTML='<div class="empty-data">'+safe(message)+'</div>';
-}
+function busy(id,message='A consultar…'){const el=$(id);if(el)el.innerHTML='<div class="empty-data">'+safe(message)+'</div>';}
 function fail(id,message){busy(id,message);}
+function toast(msg){
+  const el=$('toast');if(!el)return;
+  el.textContent=String(msg||'');
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),4500);
+}
 
 async function api(path,method='GET',data){
   const headers={'Accept':'application/json'};
@@ -235,188 +739,188 @@ async function api(path,method='GET',data){
   if(data!==undefined)headers['Content-Type']='application/json';
   const r=await fetch(API+path,{method,headers,body:data!==undefined?JSON.stringify(data):undefined,cache:'no-store'});
   const t=await r.text();
-  let j;
-  try{j=JSON.parse(t);}catch{throw Error('O servidor devolveu uma resposta inválida. HTTP '+r.status);}
-  if(!r.ok||j?.ok===false)throw Error(j?.message||j?.erro||j?.error||j?.estado||'Pedido não autorizado. HTTP '+r.status);
+  let j;try{j=JSON.parse(t);}catch{throw Error('Resposta inválida (HTTP '+r.status+').');}
+  if(!r.ok||j?.ok===false)throw Error(j?.message||j?.erro||j?.error||j?.estado||'Pedido recusado. HTTP '+r.status);
   return j;
 }
 
 async function testConnection(){
   const box=$('connectionReport');
   box.style.color='var(--muted)';
-  box.textContent='A verificar /backend/api/v4/dashboard sem enviar PIN nem dados pessoais…';
+  box.textContent='A verificar /backend/api/v4/dashboard…';
   try{
     const r=await fetch('/backend/api/v4/dashboard',{method:'GET',cache:'no-store',headers:{'Accept':'application/json'}});
     const ct=r.headers.get('content-type')||'';
-    const raw=await r.text();
-    let parsed=null;
-    try{parsed=JSON.parse(raw);}catch{}
+    const raw=await r.text();let parsed=null;try{parsed=JSON.parse(raw);}catch{}
     if(ct.includes('text/html')||(!parsed&&raw.trim().startsWith('<'))){
-      box.style.color='var(--red)';
-      box.textContent='Erro: recebemos HTML (HTTP '+r.status+') em vez da API. Confirma se o vercel.json está na raiz do GitHub e se a Vercel publicou a última versão.';
+      box.style.color='var(--rose)';
+      box.textContent='Recebemos HTML (HTTP '+r.status+') em vez de API. Verifica vercel.json e o proxy.';
       return;
     }
-    if(r.status===401||r.status===403){
-      box.style.color='var(--green)';
-      box.textContent='API alcançada (HTTP '+r.status+'). A resposta exige autenticação, como esperado. A conexão chegou ao servidor.';
-      return;
-    }
-    if(r.status===404){
-      box.style.color='var(--orange)';
-      box.textContent='HTTP 404: o caminho pedido não foi encontrado. Verifica a publicação do proxy e a rota /api/v4/dashboard no CyberHost.';
-      return;
-    }
-    if(r.status===502||r.status===503||r.status===504){
-      box.style.color='var(--red)';
-      box.textContent='HTTP '+r.status+': a Vercel não conseguiu obter resposta válida do CyberHost. Verifica se o servidor está acessível externamente na porta 3023.';
-      return;
-    }
-    if(parsed){
-      box.style.color=r.ok?'var(--green)':'var(--orange)';
-      box.textContent='O proxy respondeu com JSON (HTTP '+r.status+'). '+(r.ok?'Ligação ao servidor aparentemente disponível.':'O servidor respondeu com um erro; o caminho chegou a uma API.');
-      return;
-    }
-    box.style.color='var(--red)';
-    box.textContent='Resposta inesperada (HTTP '+r.status+'). É necessário inspeccionar a ligação entre Vercel e CyberHost.';
-  }catch(e){
-    box.style.color='var(--red)';
-    box.textContent='Erro de rede ao testar /backend: '+String(e.message||e)+'. Não introduzas o PIN até corrigirmos a ligação.';
-  }
+    if(r.status===401||r.status===403){box.style.color='var(--mint)';box.textContent='API alcançada (HTTP '+r.status+'). Autenticação exigida como esperado.';return;}
+    if(r.status===404){box.style.color='var(--amber)';box.textContent='HTTP 404. Caminho /api/v4/dashboard não encontrado no proxy.';return;}
+    if(r.status>=500){box.style.color='var(--rose)';box.textContent='HTTP '+r.status+'. Servidor indisponível na porta 3023.';return;}
+    if(parsed){box.style.color=r.ok?'var(--mint)':'var(--amber)';box.textContent='JSON recebido (HTTP '+r.status+'). '+(r.ok?'Ligação OK.':'Erro devolvido pelo servidor.');return;}
+    box.style.color='var(--rose)';box.textContent='Resposta inesperada (HTTP '+r.status+').';
+  }catch(e){box.style.color='var(--rose)';box.textContent='Erro de rede: '+String(e.message||e)+'.';}
 }
 
+/* ============ LOGIN ============ */
 function setAuthMode(mode){
   authMode=mode;
-  $('nameField').hidden=mode!=='register';
-  $('confirmField').hidden=mode!=='register';
-  $('loginTab').classList.toggle('current',mode==='login');
-  $('registerTab').classList.toggle('current',mode==='register');
-  $('authSubmit').textContent=mode==='login'?'Entrar no painel':'Criar conta';
+  const isLogin=mode==='login', isReg=mode==='register', isAdmin=mode==='admin';
+
+  $('nameField').hidden=!isReg;
+  $('phoneField').hidden=isAdmin;
+  $('pinField').hidden=isAdmin;
+  $('confirmField').hidden=!isReg;
+  $('adminKeyField').hidden=!isAdmin;
+
+  document.querySelectorAll('.auth-tabs button').forEach(b=>b.classList.toggle('current',b.dataset.mode===mode));
+
+  $('authPhone').required=!isAdmin;
+  $('authPin').required=!isAdmin;
+  $('adminKey').required=isAdmin;
+
+  $('loginHeading').textContent=isLogin?'Bem-vindo de volta':isReg?'Criar conta':'Acesso restrito';
+  $('loginSub').textContent=isLogin?'Entra na tua conta para gerir o negócio.':isReg?'Regista-te em segundos. Só precisas de número e PIN.':'Apenas o proprietário pode aceder a esta área.';
+
+  $('authSubmit').textContent=isLogin?'Entrar no painel':isReg?'Criar conta':'Entrar como administrador';
   $('authError').textContent='';
+  $('authError').style.color='var(--rose)';
 }
-const phoneNormalize=v=>String(v).replace(/\D/g,'').replace(/^258/,'');
+
 function browserDeviceId(){
-  let id='';
-  try{id=sessionStorage.getItem('itachi_browser_id')||'';}catch{}
-  if(!id){
-    id='web_'+Math.random().toString(36).slice(2)+Date.now().toString(36);
-    try{sessionStorage.setItem('itachi_browser_id',id);}catch{}
-  }
+  let id='';try{id=sessionStorage.getItem('itachi_browser_id')||'';}catch{}
+  if(!id){id='web_'+Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem('itachi_browser_id',id);}catch{}}
   return id.slice(0,128);
 }
+
 $('authForm').addEventListener('submit',async ev=>{
   ev.preventDefault();
   $('authError').textContent='';
+  $('authError').style.color='var(--rose)';
+
+  // === ADMIN ===
+  if(authMode==='admin'){
+    const key=$('adminKey').value.trim();
+    if(key.length<32){$('authError').textContent='A chave deve ter pelo menos 32 caracteres.';return;}
+    const b=$('authSubmit');
+    b.disabled=true;b.textContent='A verificar…';
+    try{
+      const r=await fetch(API+'/admin/diagnostics',{method:'GET',headers:{'x-admin-key':key,'Accept':'application/json'},cache:'no-store'});
+      if(r.status===503)throw new Error('Administração não configurada no servidor (falta ITACHI_ADMIN_IMPORT_KEY com ≥ 32 caracteres).');
+      if(r.status===403)throw new Error('Chave administrativa inválida.');
+      if(!r.ok)throw new Error('Falha ao verificar chave (HTTP '+r.status+').');
+      sessionStorage.setItem('itachi_admin_key',key);
+      location.href='./admin.html';
+      return;
+    }catch(e){
+      $('authError').textContent=errorMessage(e);
+      b.disabled=false;b.textContent='Entrar como administrador';
+      return;
+    }
+  }
+
+  // === COMERCIANTE ===
   const phone=phoneNormalize($('authPhone').value);
   const pin=$('authPin').value;
-  if(!/^(84|85|86|87|82|83)\d{7}$/.test(phone)){$('authError').textContent='Introduz um número moçambicano válido de 9 dígitos.';return;}
-  if(pin.length<4){$('authError').textContent='Introduz o PIN da tua conta.';return;}
+  if(!/^(84|85|86|87|82|83)\d{7}$/.test(phone)){$('authError').textContent='Número moçambicano inválido.';return;}
+  if(pin.length<4){$('authError').textContent='Introduz o PIN.';return;}
   if(authMode==='register'&&pin!==$('authConfirm').value){$('authError').textContent='Os PINs não coincidem.';return;}
+
   const b=$('authSubmit');
-  b.disabled=true;
-  b.textContent='A contactar o servidor…';
+  b.disabled=true;b.textContent='A contactar o servidor…';
   try{
     const payload={numero:phone,pin,dispositivo:browserDeviceId(),aparelho:'Portal Web ITACHI'};
     if(authMode==='register')payload.nome=$('authName').value.trim();
     const j=await api('/api/v4/auth/'+(authMode==='login'?'login':'register'),'POST',payload);
     if(!j.token){
-      if(authMode==='register'){setAuthMode('login');$('authError').style.color='var(--green)';$('authError').textContent='Conta criada. Agora inicia sessão.';return;}
-      throw Error('O servidor não devolveu uma sessão autorizada.');
+      if(authMode==='register'){setAuthMode('login');$('authError').style.color='var(--mint)';$('authError').textContent='Conta criada. Inicia sessão.';return;}
+      throw Error('O servidor não devolveu sessão.');
     }
     token=j.token;
     document.body.classList.add('logged');
     $('merchantPhone').textContent=phone;
-    $('authPin').value='';
-    $('authConfirm').value='';
+    $('authPin').value='';$('authConfirm').value='';
     await loadDashboard();
   }catch(e){
-    $('authError').style.color='var(--red)';
     $('authError').textContent=errorMessage(e);
   }finally{
     b.disabled=false;
-    b.textContent=authMode==='login'?'Entrar no painel':'Criar conta';
+    b.textContent=authMode==='login'?'Entrar no painel':authMode==='register'?'Criar conta':'Entrar como administrador';
   }
 });
 
 function logout(){
   token='';dashboard=null;
   document.body.classList.remove('logged');
-  $('authPin').value='';
-  $('authError').textContent='';
+  $('authPin').value='';$('authError').textContent='';
   navigate('dashboard');
 }
 function toggleSidebar(force){
-  const o=$('sidebar'),overlay=$('mobileOverlay');
+  const o=$('sidebar'),ov=$('mobileOverlay');
   const open=typeof force==='boolean'?force:!o.classList.contains('open');
   o.classList.toggle('open',open);
-  overlay.classList.toggle('show',open);
+  ov.classList.toggle('show',open);
 }
 function navigate(page){
-  const el=$('page-'+page);
-  if(!el)return;
+  const el=$('page-'+page);if(!el)return;
   currentPage=page;
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p===el));
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
-  $('topTitle').textContent=({dashboard:'Dashboard',orders:'Pedidos',devices:'Aparelhos e activação',products:'Produtos e pacotes',groups:'Grupos comerciais',whatsapp:'WhatsApp',subscription:'Assinatura',wallet:'Carteiras dos clientes',plans:'Planos e compras',payments:'Pagamentos e renovação',reports:'Relatórios',settings:'Conta e segurança'})[page]||page;
+  document.querySelectorAll('.sb-nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  $('topTitle').textContent=({dashboard:'Dashboard',orders:'Pedidos',devices:'Aparelhos',products:'Produtos',groups:'Grupos',whatsapp:'WhatsApp',subscription:'Assinatura',wallet:'Carteiras',plans:'Planos',payments:'Pagamentos',reports:'Relatórios',settings:'Conta e segurança'})[page]||page;
   toggleSidebar(false);
   window.scrollTo(0,0);
   refreshCurrent();
 }
-document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
+document.querySelectorAll('.sb-nav button').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
 
 function refreshCurrent(){
   if(!token)return;
   ({dashboard:loadDashboard,orders:loadOrders,devices:loadDevices,products:loadProducts,groups:loadGroups,whatsapp:loadWhatsApp,subscription:loadSubscription,wallet:()=>{},plans:loadPlans,payments:loadPayments,reports:loadReports,settings:loadAccount})[currentPage]?.();
 }
 
-function kpi(title,value,detail){
-  return '<div class="kpi"><div class="kpi-top">'+safe(title)+'<span class="kpi-icon">◈</span></div><div class="kpi-value">'+safe(value)+'</div><div class="kpi-foot">'+safe(detail)+'</div></div>';
+/* ============ HELPERS UI ============ */
+function kpi(title,value,detail,color='blue'){
+  return '<div class="kpi '+color+'"><div class="kpi-top">'+safe(title)+'<span class="kpi-icon">◈</span></div><div class="kpi-value">'+safe(value)+'</div><div class="kpi-foot">'+safe(detail)+'</div></div>';
 }
-const count=(obj,k)=>obj&&Object.prototype.hasOwnProperty.call(obj,k)&&Number.isFinite(Number(obj[k]))?Number(obj[k]):null;
+const count=(o,k)=>o&&Object.prototype.hasOwnProperty.call(o,k)&&Number.isFinite(Number(o[k]))?Number(o[k]):null;
 const statuses={queued:'Em fila',assigned:'Atribuídos',completed:'Concluídos',failed:'Com falha',unknown:'Em verificação',pending:'Pendentes',executing:'Em execução',reserved:'Reservados'};
 const stateLabel=s=>statuses[s]||'Outro estado';
 function summaryRow(icon,title,detail){
   return '<div class="activity-item"><div class="activity-icon">'+safe(icon)+'</div><div><b>'+safe(title)+'</b><small>'+safe(detail)+'</small></div></div>';
 }
-function dateFmt(raw){
-  const t=Date.parse(raw);
-  return Number.isNaN(t)?String(raw).slice(0,10):new Intl.DateTimeFormat('pt-MZ',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(t));
-}
 
+/* ============ DASHBOARD ============ */
 async function loadDashboard(){
-  busy('dashboardKpis');
-  busy('orderSummary');
-  busy('operationSummary');
+  busy('dashboardKpis');busy('orderSummary');busy('operationSummary');
   try{
-    const d=await api('/api/v4/dashboard');
-    dashboard=d;
+    const d=await api('/api/v4/dashboard');dashboard=d;
     const orders=d.orders||{};
-    const counts=Object.values(orders).filter(v=>Number.isFinite(Number(v))).map(Number);
-    const total=counts.reduce((a,b)=>a+b,0);
-    const hasOrders=Object.keys(orders).length>0;
-    const online=count(d.devices,'online'),devices=count(d.devices,'total');
-    const wallets=d.walletTotalCents;
+    const total=Object.values(orders).filter(v=>Number.isFinite(Number(v))).map(Number).reduce((a,b)=>a+b,0);
+    const online=count(d.devices,'online'),devices=count(d.devices,'total'),wallets=d.walletTotalCents;
     $('dashboardKpis').innerHTML=
-      kpi('Saldo das carteiras',wallets==null?'Não comunicado':money(wallets),'Saldo financeiro dos clientes')+
-      kpi('Pedidos totais',hasOrders?num(total):'0','Todos os estados')+
-      kpi('Aparelhos online',online==null?'Não comunicado':num(online),(devices==null?'—':num(devices))+' aparelhos associados')+
-      kpi('Produtos activos',count(d.products,'enabled')==null?'Não comunicado':num(d.products.enabled),'Catálogo comercial')+
-      kpi('Grupos activos',count(d.groups,'enabled')==null?'Não comunicado':num(d.groups.enabled),'Grupos habilitados')+
-      kpi('Pedidos concluídos',num(count(orders,'completed')??0),'Operações finalizadas')+
-      kpi('Pedidos com falha',num(count(orders,'failed')??0),'Necessitam de atenção')+
-      kpi('Em verificação',num(count(orders,'unknown')??0),'Não repetir sem confirmação');
-    $('orderSummary').innerHTML=Object.entries(orders).length
+      kpi('Carteiras',wallets==null?'—':money(wallets),'Saldo dos clientes','gold')+
+      kpi('Pedidos',num(total),'Todos os estados','blue')+
+      kpi('Online',online==null?'—':num(online),(devices==null?'—':num(devices))+' associados','mint')+
+      kpi('Produtos',count(d.products,'enabled')==null?'—':num(d.products.enabled),'Activos','violet')+
+      kpi('Grupos',count(d.groups,'enabled')==null?'—':num(d.groups.enabled),'Activos','amber')+
+      kpi('Concluídos',num(count(orders,'completed')??0),'Finalizados','mint')+
+      kpi('Falhas',num(count(orders,'failed')??0),'Requer atenção','rose')+
+      kpi('Verificação',num(count(orders,'unknown')??0),'Não repetir','blue');
+    $('orderSummary').innerHTML=Object.keys(orders).length
       ?Object.entries(orders).map(([k,v])=>summaryRow('▤',stateLabel(k),num(v)+' pedido(s)')).join('')
-      :'<div class="empty-data">Ainda não existem pedidos registados.</div>';
+      :'<div class="empty-data">Ainda sem pedidos.</div>';
     const sub=d.subscription||{};
     const expiry=sub.expiresAt||sub.expires_at||null;
     $('sideSub').textContent=sub.active===true?'Activa':sub.active===false?'Inactiva':'Não comunicado';
-    $('sideExpiry').textContent=expiry?'Validade: '+dateFmt(expiry):'Validade não comunicada';
+    $('sideExpiry').textContent=expiry?'Até '+dateFmt(expiry):'—';
     const wa=d.whatsapp||{};
-    const waState=wa.status||wa.state||'Não comunicado';
     $('operationSummary').innerHTML=
-      summaryRow('▣','Aparelhos',(online??'—')+' online de '+(devices??'—')+' associados')+
-      summaryRow('◉','WhatsApp',waState)+
-      summaryRow('◇','Assinatura',expiry?'Válida até '+dateFmt(expiry):'Data não comunicada');
+      summaryRow('▣','Aparelhos',(online??'—')+' online de '+(devices??'—'))+
+      summaryRow('◉','WhatsApp',text(wa.status||wa.state||'Não comunicado'))+
+      summaryRow('◇','Assinatura',expiry?'Até '+dateFmt(expiry):'—');
   }catch(e){
     fail('dashboardKpis',errorMessage(e));
     $('orderSummary').innerHTML='';
@@ -424,148 +928,83 @@ async function loadDashboard(){
   }
 }
 
-async function loadDevices(){
-  busy('devicesArea');
-  try{
-    const j=await api('/devices');
-    const list=j.devices||j.dispositivos||[];
-    if(!Array.isArray(list))throw Error('Formato de aparelhos inesperado.');
-    if(!list.length){busy('devicesArea','Ainda não há aparelhos associados à tua conta.');return;}
-    $('devicesArea').innerHTML=list.map(d=>{
-      const online=d.online===true,enabled=d.enabled??d.ativo;
-      return '<div class="device"><div class="device-top"><div class="device-symbol">▣</div><span class="status '+(online?'ok':'wait')+'">'+(online?'Online':'Estado não confirmado')+'</span></div><h3>'+safe(d.nome||d.label||'Aparelho Android')+'</h3><p>Executor associado à tua conta</p><div class="device-meta"><div><span>ID do aparelho</span><b>'+safe(String(d.uuid||d.id||'—').slice(0,18))+'</b></div><div><span>Autorizado</span><b>'+(d.aprovado===true||d.approved===true?'Sim':'Não confirmado')+'</b></div><div><span>Activado</span><b>'+(enabled===true?'Sim':enabled===false?'Não':'Não comunicado')+'</b></div></div></div>';
-    }).join('');
-  }catch(e){fail('devicesArea',errorMessage(e));}
-}
-
-async function createActivation(){
-  if(!confirm('Gerar um código temporário para associar uma APK à tua conta?'))return;
-  const block=$('activationResult');
-  block.style.display='none';
-  try{
-    const j=await api('/devices/activation-code','POST',{});
-    const code=j.codigoAtivacao||j.code;
-    if(!code)throw Error('Servidor não devolveu código de activação.');
-    currentActivation=String(code);
-    $('activationCode').textContent=code;
-    $('activationExpiry').textContent='Válido durante '+(j.validadeMinutos||15)+' minutos. Uso único.';
-    block.style.display='block';
-  }catch(e){toast(errorMessage(e));}
-}
-async function copyCode(){
-  if(!currentActivation)return;
-  try{await navigator.clipboard.writeText(currentActivation);toast('Código copiado.');}
-  catch{toast('Selecciona o código para o copiar.');}
-}
-
-async function loadProducts(){
-  busy('productsArea');
-  try{
-    const j=await api('/app/products');
-    const list=j.products||[];
-    window.catalogCache=list;
-    if(!Array.isArray(list))throw Error('Formato de produtos inesperado.');
-    if(!list.length){busy('productsArea','Ainda não existem produtos disponíveis no catálogo.');return;}
-    $('productsArea').innerHTML=list.map((p,idx)=>'<div class="product"><div class="product-icon">▦</div><h3>'+safe(p.type||'Pacote')+' · '+safe(p.quantityMB==null?'—':num(p.quantityMB)+' MB')+'</h3><p>Grupo: '+safe(p.groupJid||'Não comunicado')+'</p><div class="price">'+safe(p.priceCents==null?'Não comunicado':money(p.priceCents))+'</div><div class="device-meta"><div><span>Estado</span><b>'+(p.enabled?'Activo':'Inactivo')+'</b></div><div><span>ID</span><b>'+safe(String(p.id||'').slice(0,20))+'</b></div></div><button class="btn small product-edit" data-product-index="'+idx+'">Editar preço / estado</button></div>').join('');
-  }catch(e){fail('productsArea',errorMessage(e));}
-}
-async function loadGroups(){
-  busy('groupsArea');
-  try{
-    const j=await api('/groups');
-    const list=j.groups||[];
-    if(!Array.isArray(list))throw Error('Formato dos grupos inesperado.');
-    if(!list.length){busy('groupsArea','Não há grupos configurados nesta conta.');return;}
-    $('groupsArea').innerHTML=list.map(g=>'<div class="group-row"><div><b>'+safe(g.name||g.subject||'Grupo WhatsApp')+'</b><div class="muted" style="margin-top:5px;font-size:10px">'+safe(g.groupJid||g.jid||'ID não comunicado')+'</div></div><span class="status '+(g.enabled===true?'ok':'wait')+'">'+(g.enabled===true?'Activo':g.enabled===false?'Desactivado':'Estado não comunicado')+'</span></div>').join('');
-  }catch(e){fail('groupsArea',errorMessage(e));}
-}
-
-async function loadWhatsApp(){
-  busy('whatsappArea');
-  try{
-    let w=dashboard?.whatsapp;
-    if(!w){const j=await api('/api/v4/dashboard');w=j.whatsapp||{};}
-    const status=text(w.status||w.state||'Não comunicado');
-    $('whatsappArea').innerHTML=summaryRow('◉','Ligação do WhatsApp',status)+summaryRow('▦','Grupos comerciais','Consulta os grupos na secção Grupos.');
-  }catch(e){fail('whatsappArea',errorMessage(e));}
-}
-async function loadSubscription(){
-  busy('subscriptionArea');
-  try{
-    const j=await api('/api/v4/subscription');
-    const s=j.subscription||j;
-    const active=s.active??s.ativo;
-    const expiry=s.expiresAt||s.expires_at||j.expiraEm;
-    $('subscriptionArea').innerHTML=
-      summaryRow('◇','Estado da assinatura',active===true?'Activa':active===false?'Inactiva':'Não comunicado')+
-      summaryRow('◷','Validade',expiry?dateFmt(expiry):'Não comunicada')+
-      '<div class="stat-note" style="margin-top:18px">Pagamentos e renovações só serão activados depois de confirmar o contrato e os mecanismos de pagamento existentes no servidor.</div>';
-  }catch(e){fail('subscriptionArea',errorMessage(e));}
-}
-
-async function connectWhatsApp(){
-  const phone=$('waPhone').value.replace(/\D/g,'');
-  if(!/^258\d{9}$/.test(phone)){$('waConnectResult').textContent='Introduz o número moçambicano com prefixo 258.';return;}
-  if(!confirm('Iniciar a ligação do WhatsApp '+phone+' à tua conta?'))return;
-  const el=$('waConnectResult');
-  el.textContent='A iniciar ligação…';
-  try{
-    const j=await api('/whatsapp/connect','POST',{phone});
-    el.textContent=j.message||j.mensagem||'Pedido de ligação aceite. Consulta o emparelhamento.';
-    await loadPairing();
-  }catch(e){el.textContent=errorMessage(e);}
-}
-async function loadPairing(){
-  const el=$('pairingArea');
-  el.textContent='A consultar o emparelhamento…';
-  try{
-    const j=await api('/whatsapp/pairing');
-    const code=j.code||j.pairingCode||j.codigo||null;
-    const state=j.status||j.state||j.estado||null;
-    el.innerHTML=(state?summaryRow('◉','Estado',String(state)):'')+(code?summaryRow('▤','Código comunicado pelo servidor',String(code)):'')||'Ainda não há código de emparelhamento disponível. Consulta novamente mais tarde.';
-  }catch(e){el.textContent=errorMessage(e);}
-}
-async function disconnectWhatsApp(){
-  if(!confirm('Tens a certeza que desejas desassociar a sessão WhatsApp desta conta?'))return;
-  try{await api('/whatsapp/disconnect','POST',{});toast('Pedido de desassociação aceite pelo servidor.');await loadWhatsApp();}
-  catch(e){toast(errorMessage(e));}
-}
-
-let ordersCache=[];
+/* ============ PEDIDOS ============ */
 async function loadOrders(){
   busy('ordersArea');
   try{
     const j=await api('/orders');
     const list=j.orders||j.pedidos||[];
-    if(!Array.isArray(list))throw Error('Formato de pedidos inesperado.');
-    ordersCache=list;
-    renderOrdersTable();
+    if(!Array.isArray(list))throw Error('Formato inesperado.');
+    ordersCache=list;renderOrdersTable();
   }catch(e){fail('ordersArea',errorMessage(e));}
 }
 function renderOrdersTable(){
   const area=$('ordersArea');
   const f=$('orderStatusFilter')?.value||'all',q=($('orderSearchText')?.value||'').trim().toLowerCase();
   const list=ordersCache.filter(o=>(f==='all'||o.status===f)&&[o.id,o.destination,o.numero,o.pedidoId].join(' ').toLowerCase().includes(q));
-  if(!list.length){area.className='empty-data';area.textContent='Nenhum pedido corresponde à pesquisa.';return;}
+  if(!list.length){area.className='empty-data';area.textContent='Nenhum pedido corresponde.';return;}
   area.className='table-wrap';
-  const rows=list.map(o=>'<tr><td>'+safe(String(o.id||o.pedidoId||'—').slice(0,18))+'</td><td>'+safe(o.destination||o.numero||'—')+'</td><td>'+safe(o.quantityMB??o.quantity_mb??o.quantidadeMB??'—')+' MB</td><td>'+safe(stateLabel(o.status||o.estado))+'</td><td>'+safe(o.createdAt?dateFmt(o.createdAt):o.created_at?dateFmt(o.created_at):'—')+'</td></tr>').join('');
-  area.innerHTML='<table><thead><tr><th>Referência</th><th>Destinatário</th><th>Quantidade</th><th>Situação</th><th>Data</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  area.innerHTML='<table><thead><tr><th>Referência</th><th>Destino</th><th>Qtd</th><th>Estado</th><th>Data</th></tr></thead><tbody>'
+    +list.map(o=>'<tr><td class="mono">'+safe(String(o.id||o.pedidoId||'—').slice(0,18))+'</td><td>'+safe(o.destination||o.numero||'—')+'</td><td class="mono">'+safe(o.quantityMB??o.quantity_mb??o.quantidadeMB??'—')+' MB</td><td>'+safe(stateLabel(o.status||o.estado))+'</td><td>'+safe(o.createdAt?dateFmt(o.createdAt):o.created_at?dateFmt(o.created_at):'—')+'</td></tr>').join('')
+    +'</tbody></table>';
 }
 function exportOrdersCsv(){
-  if(!ordersCache.length){toast('Não há pedidos para exportar.');return;}
-  const cols=['Referência','Destino','Quantidade MB','Estado','Data'];
+  if(!ordersCache.length){toast('Sem pedidos para exportar.');return;}
+  const cols=['Referência','Destino','Qtd MB','Estado','Data'];
   const rows=ordersCache.map(o=>[o.id||o.pedidoId||'',o.destination||o.numero||'',o.quantity_mb??o.quantityMB??o.quantidadeMB??'',stateLabel(o.status||o.estado),o.created_at||o.createdAt||'']);
-  const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
-  const csv='\ufeff'+[cols,...rows].map(r=>r.map(quote).join(';')).join('\r\n');
+  const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
+  const csv='\ufeff'+[cols,...rows].map(r=>r.map(q).join(';')).join('\r\n');
   const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-  const a=document.createElement('a');
-  a.href=u;a.download='itachi-pedidos.csv';a.click();
+  const a=document.createElement('a');a.href=u;a.download='itachi-pedidos.csv';a.click();
   setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
 
-let editingProduct=null;
+/* ============ APARELHOS ============ */
+async function loadDevices(){
+  busy('devicesArea');
+  try{
+    const j=await api('/devices');
+    const list=j.devices||j.dispositivos||[];
+    if(!Array.isArray(list))throw Error('Formato inesperado.');
+    if(!list.length){busy('devicesArea','Sem aparelhos associados.');return;}
+    $('devicesArea').innerHTML=list.map(d=>{
+      const online=d.online===true,enabled=d.enabled??d.ativo;
+      return '<div class="device"><div class="device-top"><div class="device-symbol">▣</div><span class="status '+(online?'ok':'wait')+'">'+(online?'Online':'Off')+'</span></div><h3>'+safe(d.nome||d.label||'Android')+'</h3><p>Executor da conta</p><div class="device-meta"><div><span>ID</span><b>'+safe(String(d.uuid||d.id||'—').slice(0,16))+'</b></div><div><span>Autorizado</span><b>'+(d.aprovado===true||d.approved===true?'Sim':'—')+'</b></div><div><span>Activo</span><b>'+(enabled===true?'Sim':enabled===false?'Não':'—')+'</b></div></div></div>';
+    }).join('');
+  }catch(e){fail('devicesArea',errorMessage(e));}
+}
+async function createActivation(){
+  if(!confirm('Gerar código temporário para APK?'))return;
+  $('activationResult').style.display='none';
+  try{
+    const j=await api('/devices/activation-code','POST',{});
+    const code=j.codigoAtivacao||j.code;
+    if(!code)throw Error('Sem código.');
+    currentActivation=String(code);
+    $('activationCode').textContent=code;
+    $('activationExpiry').textContent='Válido '+(j.validadeMinutos||15)+' min · uso único.';
+    $('activationResult').style.display='block';
+  }catch(e){toast(errorMessage(e));}
+}
+async function copyCode(){
+  if(!currentActivation)return;
+  try{await navigator.clipboard.writeText(currentActivation);toast('Copiado.');}catch{toast('Selecciona o código.');}
+}
+
+/* ============ PRODUTOS ============ */
+async function loadProducts(){
+  busy('productsArea');
+  try{
+    const j=await api('/app/products');
+    const list=j.products||[];
+    window.catalogCache=list;
+    if(!Array.isArray(list))throw Error('Formato inesperado.');
+    if(!list.length){busy('productsArea','Catálogo vazio.');return;}
+    $('productsArea').innerHTML=list.map((p,idx)=>'<div class="product"><div class="product-icon">▦</div><h3>'+safe(p.type||'Pacote')+' · '+safe(p.quantityMB==null?'—':num(p.quantityMB)+' MB')+'</h3><p>'+safe(p.groupJid||'—')+'</p><div class="price">'+safe(p.priceCents==null?'—':money(p.priceCents))+'</div><div class="device-meta"><div><span>Estado</span><b>'+(p.enabled?'Activo':'Inactivo')+'</b></div></div><button class="btn small product-edit" data-product-index="'+idx+'" style="margin-top:12px">Editar</button></div>').join('');
+  }catch(e){fail('productsArea',errorMessage(e));}
+}
 function editProduct(p){
-  if(!p||!p.id){toast('Este produto não tem identificação válida.');return;}
+  if(!p||!p.id){toast('Produto sem ID.');return;}
   editingProduct=p;
   $('editProductPanel').style.display='block';
   $('editProductName').textContent=(p.type||'Pacote')+' · '+num(p.quantityMB)+' MB';
@@ -577,27 +1016,85 @@ function editProduct(p){
 async function saveProduct(){
   if(!editingProduct)return;
   const raw=$('editProductPrice').value.replace(',','.').trim();
-  if(!/^\d+(?:\.\d{1,2})?$/.test(raw)){toast('Introduz um preço válido em MT, com até duas casas decimais.');return;}
+  if(!/^\d+(?:\.\d{1,2})?$/.test(raw)){toast('Preço inválido.');return;}
   const cents=Math.round(Number(raw)*100);
-  if(!Number.isSafeInteger(cents)||cents<=0||cents>1000000000){toast('Preço fora dos limites permitidos.');return;}
+  if(!Number.isSafeInteger(cents)||cents<=0||cents>1000000000){toast('Preço fora dos limites.');return;}
   const enabled=$('editProductEnabled').value==='true';
-  if(!confirm('Confirmas a alteração do preço para '+(cents/100).toFixed(2)+' MT e estado '+(enabled?'activo':'inactivo')+'?'))return;
+  if(!confirm('Alterar para '+(cents/100).toFixed(2)+' MT ('+(enabled?'activo':'inactivo')+')?'))return;
   try{
     await api('/app/products/'+encodeURIComponent(editingProduct.id),'PATCH',{priceCents:cents,enabled});
     $('editProductPanel').style.display='none';
-    toast('Produto actualizado pelo servidor.');
+    toast('Actualizado.');
     await loadProducts();
   }catch(e){$('editProductMsg').textContent=errorMessage(e);}
 }
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.product-edit');if(!btn)return;
+  const idx=Number(btn.dataset.productIndex);const list=window.catalogCache||[];
+  if(list[idx])editProduct(list[idx]);
+});
 
+/* ============ GRUPOS ============ */
+async function loadGroups(){
+  busy('groupsArea');
+  try{
+    const j=await api('/groups');const list=j.groups||[];
+    if(!Array.isArray(list))throw Error('Formato inesperado.');
+    if(!list.length){busy('groupsArea','Sem grupos configurados.');return;}
+    $('groupsArea').innerHTML=list.map(g=>'<div class="group-row"><div><b>'+safe(g.name||g.subject||'Grupo')+'</b><div class="mono" style="margin-top:4px">'+safe(g.groupJid||g.jid||'—')+'</div></div><span class="status '+(g.enabled===true?'ok':'wait')+'">'+(g.enabled===true?'Activo':g.enabled===false?'Desactivado':'—')+'</span></div>').join('');
+  }catch(e){fail('groupsArea',errorMessage(e));}
+}
+
+/* ============ WHATSAPP ============ */
+async function loadWhatsApp(){
+  busy('whatsappArea');
+  try{
+    let w=dashboard?.whatsapp;
+    if(!w){const j=await api('/api/v4/dashboard');w=j.whatsapp||{};}
+    $('whatsappArea').innerHTML=summaryRow('◉','Ligação',text(w.status||w.state||'—'))+summaryRow('▦','Grupos','Consulta na secção Grupos.');
+  }catch(e){fail('whatsappArea',errorMessage(e));}
+}
+async function loadSubscription(){
+  busy('subscriptionArea');
+  try{
+    const j=await api('/api/v4/subscription');
+    const s=j.subscription||j;const active=s.active??s.ativo;const expiry=s.expiresAt||s.expires_at||j.expiraEm;
+    $('subscriptionArea').innerHTML=summaryRow('◇','Estado',active===true?'Activa':active===false?'Inactiva':'—')+summaryRow('◷','Validade',expiry?dateFmt(expiry):'—')+'<div class="portal-note" style="margin-top:16px">Pagamentos e renovações seguem o mecanismo existente no servidor.</div>';
+  }catch(e){fail('subscriptionArea',errorMessage(e));}
+}
+async function connectWhatsApp(){
+  const phone=$('waPhone').value.replace(/\D/g,'');
+  if(!/^258\d{9}$/.test(phone)){$('waConnectResult').textContent='Prefixo 258 obrigatório.';return;}
+  if(!confirm('Ligar WhatsApp '+phone+'?'))return;
+  const el=$('waConnectResult');el.textContent='A iniciar…';
+  try{
+    const j=await api('/whatsapp/connect','POST',{phone});
+    el.textContent=j.message||j.mensagem||'Pedido aceite.';
+    await loadPairing();
+  }catch(e){el.textContent=errorMessage(e);}
+}
+async function loadPairing(){
+  const el=$('pairingArea');el.textContent='A consultar…';
+  try{
+    const j=await api('/whatsapp/pairing');
+    const code=j.code||j.pairingCode||j.codigo||null;
+    const state=j.status||j.state||j.estado||null;
+    el.innerHTML=(state?summaryRow('◉','Estado',String(state)):'')+(code?summaryRow('▤','Código',String(code)):'')||'Sem código disponível.';
+  }catch(e){el.textContent=errorMessage(e);}
+}
+async function disconnectWhatsApp(){
+  if(!confirm('Desassociar sessão WhatsApp?'))return;
+  try{await api('/whatsapp/disconnect','POST',{});toast('Pedido aceite.');await loadWhatsApp();}catch(e){toast(errorMessage(e));}
+}
+
+/* ============ CARTEIRA ============ */
 function walletJid(v){
   const t=String(v||'').trim();
-  if(!t||t.length>200||/[\s?#&]/.test(t))throw Error('Introduz o identificador completo e válido do cliente.');
+  if(!t||t.length>200||/[\s?#&]/.test(t))throw Error('JID inválido.');
   return t;
 }
 async function lookupWallet(){
-  const el=$('walletArea');
-  el.textContent='A consultar…';
+  const el=$('walletArea');el.textContent='A consultar…';
   try{
     const jid=walletJid($('walletJid').value);
     const j=await api('/wallet?customerJid='+encodeURIComponent(jid));
@@ -608,212 +1105,137 @@ async function creditWallet(){
   const el=$('creditArea');
   try{
     const customerJid=walletJid($('creditJid').value),provider=$('creditProvider').value,reference=$('creditRef').value.trim();
-    if(reference.length<4)throw Error('Introduz uma referência de pagamento válida.');
-    if(!confirm('Verificar esta referência no servidor e, se aprovada, creditar a carteira do cliente?'))return;
-    el.textContent='A confirmar pagamento…';
+    if(reference.length<4)throw Error('Referência inválida.');
+    if(!confirm('Verificar e creditar?'))return;
+    el.textContent='A confirmar…';
     await api('/wallet/redeem','POST',{customerJid,provider,reference});
-    el.textContent='Pagamento aceite e carteira actualizada pelo servidor.';
+    el.textContent='Carteira actualizada.';
   }catch(e){el.textContent=errorMessage(e);}
 }
 
-let serverPlans=[];
+/* ============ PLANOS ============ */
 async function loadPlans(){
   busy('plansArea');
   try{
     const j=await api('/app/subscription/plans');
     serverPlans=Array.isArray(j.plans)?j.plans:Array.isArray(j.planos)?j.planos:[];
-    if(!serverPlans.length){
-      $('plansArea').innerHTML='<div class="empty-data">O servidor não devolveu planos activos.</div>';
-      return;
-    }
+    if(!serverPlans.length){$('plansArea').innerHTML='<div class="empty-data">Sem planos activos no servidor.</div>';return;}
     $('plansArea').innerHTML=serverPlans.map((p,idx)=>{
-      const priceCents=
-        p.priceCents!=null?Number(p.priceCents):
-        p.precoCents!=null?Number(p.precoCents):
-        p.price!=null?Math.round(Number(p.price)*100):
-        p.preco!=null?Math.round(Number(p.preco)*100):0;
+      const priceCents=p.priceCents!=null?Number(p.priceCents):p.precoCents!=null?Number(p.precoCents):p.price!=null?Math.round(Number(p.price)*100):p.preco!=null?Math.round(Number(p.preco)*100):0;
       const days=Number(p.days??p.dias??0);
       const name=p.name||p.nome||(days?days+' dias':'Plano');
       const featured=idx===0;
       return '<div class="plan'+(featured?' featured':'')+'">'
         +(featured?'<span class="ribbon">RECOMENDADO</span>':'')
         +'<h3>'+safe(name)+'</h3>'
-        +'<p>Assinatura comercial ITACHI BOT PRO.</p>'
+        +'<p>Assinatura comercial ITACHI.</p>'
         +'<div class="price">'+safe(money(priceCents))+'<small> / '+(days||'—')+' dias</small></div>'
-        +'<div class="features">'
-          +'<span>Gestão de grupos e catálogo</span>'
-          +'<span>Execução em aparelhos autorizados</span>'
-          +'<span>Dashboard e relatórios</span>'
-        +'</div>'
-        +'<button class="btn primary" onclick="navigate(\'payments\')">Preparar pagamento</button>'
+        +'<div class="features"><span>Grupos e catálogo</span><span>Aparelhos autorizados</span><span>Dashboard e relatórios</span></div>'
+        +'<button class="btn primary" onclick="navigate(\'payments\')" style="width:100%">Preparar pagamento</button>'
         +'</div>';
     }).join('');
   }catch(e){fail('plansArea',errorMessage(e));}
 }
 
+/* ============ PAGAMENTOS ============ */
 async function loadPayments(){
-  busy('checkoutPlanArea','A consultar planos…');
-  busy('paymentHistory','A consultar histórico…');
+  busy('checkoutPlanArea','A consultar planos…');busy('paymentHistory','A consultar histórico…');
   try{
     const j=await api('/app/subscription/plans');
     const list=Array.isArray(j.plans)?j.plans:Array.isArray(j.planos)?j.planos:[];
     const p=list[0]||{};
-    const priceCents=
-      p.priceCents!=null?Number(p.priceCents):
-      p.precoCents!=null?Number(p.precoCents):
-      p.price!=null?Math.round(Number(p.price)*100):
-      p.preco!=null?Math.round(Number(p.preco)*100):0;
+    const priceCents=p.priceCents!=null?Number(p.priceCents):p.precoCents!=null?Number(p.precoCents):p.price!=null?Math.round(Number(p.price)*100):p.preco!=null?Math.round(Number(p.preco)*100):0;
     const days=Number(p.days??p.dias??0);
     const name=p.name||p.nome||(days?days+' dias':'Plano');
-    $('checkoutPlanArea').innerHTML=
-      '<div class="portal-metric">'+safe(money(priceCents))+'</div>'+
-      '<div class="portal-hint">'+safe(name)+' · '+(days||'—')+' dias</div>';
+    $('checkoutPlanArea').innerHTML='<div class="portal-metric">'+safe(money(priceCents))+'</div><div class="portal-hint">'+safe(name)+' · '+(days||'—')+' dias</div>';
     window.checkoutPlan=p;
   }catch(e){$('checkoutPlanArea').textContent=errorMessage(e);}
   try{
     const h=await api('/app/subscription/history');
-    const list=Array.isArray(h.payments)?h.payments:
-      Array.isArray(h.history)?h.history:
-      Array.isArray(h.pagamentos)?h.pagamentos:
-      Array.isArray(h)?h:[];
-    if(!list.length){
-      $('paymentHistory').innerHTML='<div class="empty-data">Sem pagamentos registados.</div>';
-      return;
-    }
-    $('paymentHistory').innerHTML='<div class="table-wrap"><table>'
-      +'<thead><tr><th>Data</th><th>Método</th><th>Referência</th><th>Estado</th><th>Valor</th></tr></thead><tbody>'
-      +list.map(p=>'<tr>'
-        +'<td>'+safe(p.createdAt?dateFmt(p.createdAt):p.created_at?dateFmt(p.created_at):p.data?dateFmt(p.data):'—')+'</td>'
-        +'<td>'+safe(p.provider||p.provedor||p.metodo||'—')+'</td>'
-        +'<td>'+safe(p.reference||p.referencia||p.ref||'—')+'</td>'
-        +'<td>'+safe(p.status||p.estado||'—')+'</td>'
-        +'<td>'+safe(p.amountCents!=null?money(p.amountCents):p.valorCents!=null?money(p.valorCents):p.amount!=null?money(Math.round(p.amount*100)):'—')+'</td>'
-        +'</tr>').join('')
+    const list=Array.isArray(h.payments)?h.payments:Array.isArray(h.history)?h.history:Array.isArray(h.pagamentos)?h.pagamentos:Array.isArray(h)?h:[];
+    if(!list.length){$('paymentHistory').innerHTML='<div class="empty-data">Sem pagamentos.</div>';return;}
+    $('paymentHistory').innerHTML='<div class="table-wrap"><table><thead><tr><th>Data</th><th>Método</th><th>Referência</th><th>Estado</th><th>Valor</th></tr></thead><tbody>'
+      +list.map(p=>'<tr><td>'+safe(p.createdAt?dateFmt(p.createdAt):p.created_at?dateFmt(p.created_at):p.data?dateFmt(p.data):'—')+'</td><td>'+safe(p.provider||p.provedor||p.metodo||'—')+'</td><td class="mono">'+safe(p.reference||p.referencia||p.ref||'—')+'</td><td>'+safe(p.status||p.estado||'—')+'</td><td class="mono">'+safe(p.amountCents!=null?money(p.amountCents):p.valorCents!=null?money(p.valorCents):p.amount!=null?money(Math.round(p.amount*100)):'—')+'</td></tr>').join('')
       +'</tbody></table></div>';
   }catch(e){$('paymentHistory').textContent=errorMessage(e);}
 }
-
 async function createCheckout(){
   const el=$('checkoutArea');
-  if(!confirm('Preparar pagamento da assinatura?'))return;
+  if(!confirm('Preparar pagamento?'))return;
   el.textContent='A preparar…';
   try{
     const provider=$('checkoutProvider').value;
     const j=await api('/app/subscription/checkout','POST',{provider});
     const ref=j.reference||j.referencia||j.checkoutId||j.providerReference||'';
-    const instructions=j.instructions||j.instrucoes||j.paymentInstructions||j.instrucoesPagamento||null;
+    const instr=j.instructions||j.instrucoes||j.paymentInstructions||j.instrucoesPagamento||null;
     const amountCents=j.amountCents??j.valorCents??null;
-    el.innerHTML=
-      summaryRow('▤','Referência',ref||'Não comunicada')+
-      (amountCents!=null?summaryRow('₥','Valor',money(amountCents)):'')+
-      (instructions?summaryRow('◇','Instruções do provedor',String(instructions)):'')+
-      '<div class="portal-hint">Efectua o pagamento no telemóvel e depois usa a caixa "Consultar confirmação" com a referência.</div>';
+    el.innerHTML=summaryRow('▤','Referência',ref||'—')+(amountCents!=null?summaryRow('₥','Valor',money(amountCents)):'')+(instr?summaryRow('◇','Instruções',String(instr)):'')+'<div class="portal-hint">Efectua o pagamento e usa "Consultar confirmação" com a referência.</div>';
   }catch(e){el.textContent=errorMessage(e);}
 }
-
 async function verifyPayment(){
-  const el=$('paymentResult');
-  el.textContent='A consultar o servidor…';
+  const el=$('paymentResult');el.textContent='A consultar…';
   try{
-    const provider=$('verifyProvider').value;
-    const reference=$('verifyRef').value.trim();
-    if(reference.length<4)throw new Error('Introduz a referência do pagamento.');
+    const provider=$('verifyProvider').value,reference=$('verifyRef').value.trim();
+    if(reference.length<4)throw new Error('Referência inválida.');
     const j=await api('/app/subscription/payment-status?provider='+encodeURIComponent(provider)+'&reference='+encodeURIComponent(reference));
     const status=j.status||j.estado||j.state||'—';
     const active=j.active===true||j.ativo===true||status==='active'||status==='confirmed'||status==='paid'||status==='pago';
-    el.innerHTML=
-      summaryRow('◈','Estado',String(status))
-      +(j.expiresAt?summaryRow('◷','Nova validade',dateFmt(j.expiresAt)):'')
-      +(j.message||j.mensagem?summaryRow('▦','Detalhe',String(j.message||j.mensagem)):'');
-    if(active){
-      await loadSubscription();
-      await loadDashboard();
-      toast('Assinatura activada pelo servidor.');
-    }
+    el.innerHTML=summaryRow('◈','Estado',String(status))+(j.expiresAt?summaryRow('◷','Nova validade',dateFmt(j.expiresAt)):'')+(j.message||j.mensagem?summaryRow('▦','Detalhe',String(j.message||j.mensagem)):'');
+    if(active){await loadSubscription();await loadDashboard();toast('Assinatura activada.');}
   }catch(e){el.textContent=errorMessage(e);}
 }
 
+/* ============ RELATÓRIOS ============ */
 async function loadReports(){
-  busy('reportsKpis');
-  busy('reportsOrders','A consultar o servidor…');
+  busy('reportsKpis');busy('reportsOrders','A consultar…');
   try{
     const d=await api('/api/v4/dashboard');
     const orders=d.orders||{};
     const total=Object.values(orders).reduce((a,b)=>a+(Number(b)||0),0);
     $('reportsKpis').innerHTML=
-      kpi('Pedidos totais',num(total),'Todos os estados')+
-      kpi('Concluídos',num(Number(orders.completed)||0),'Finalizados')+
-      kpi('Com falha',num(Number(orders.failed)||0),'Necessitam revisão')+
-      kpi('Em verificação',num(Number(orders.unknown)||0),'Não repetir sem confirmação');
+      kpi('Pedidos',num(total),'Todos','blue')+
+      kpi('Concluídos',num(Number(orders.completed)||0),'Finalizados','mint')+
+      kpi('Falhas',num(Number(orders.failed)||0),'Requer revisão','rose')+
+      kpi('Verificação',num(Number(orders.unknown)||0),'Não repetir','amber');
     $('reportsOrders').innerHTML=Object.keys(orders).length
       ?Object.entries(orders).map(([k,v])=>summaryRow('▤',stateLabel(k),num(v)+' pedido(s)')).join('')
-      :'<div class="empty-data">Ainda não existem pedidos registados.</div>';
-  }catch(e){
-    fail('reportsKpis',errorMessage(e));
-    $('reportsOrders').textContent=errorMessage(e);
-  }
+      :'<div class="empty-data">Sem pedidos.</div>';
+  }catch(e){fail('reportsKpis',errorMessage(e));$('reportsOrders').textContent=errorMessage(e);}
 }
 
+/* ============ CONTA ============ */
 async function loadAccount(){
-  const area=$('accountArea');
-  area.textContent='A consultar o servidor…';
+  const area=$('accountArea');area.textContent='A consultar…';
   try{
-    const me=await api('/me');
-    const acc=await api('/app/account');
+    const me=await api('/me');const acc=await api('/app/account');
     const sub=me.subscription||acc.subscription||{};
     const active=sub.active===true;
     const expiry=sub.expiresAt||sub.expires_at||acc.expiresAt||null;
     const phone=acc.phone||acc.numero||me.phone||'—';
     const devices=acc.devicesCount??acc.devices??acc.dispositivos??'—';
     const name=acc.name||acc.nome||'Comerciante';
-    area.innerHTML=
-      summaryRow('◈','Número da conta',String(phone))+
-      summaryRow('◇','Assinatura',active?'Activa':'Inactiva')+
-      summaryRow('◷','Validade',expiry?dateFmt(expiry):'Não comunicada')+
-      summaryRow('▣','Aparelhos associados',String(devices));
+    area.innerHTML=summaryRow('◈','Número',String(phone))+summaryRow('◇','Assinatura',active?'Activa':'Inactiva')+summaryRow('◷','Validade',expiry?dateFmt(expiry):'—')+summaryRow('▣','Aparelhos',String(devices));
     $('sideSub').textContent=active?'Activa':'Inactiva';
-    $('sideExpiry').textContent=expiry?'Validade: '+dateFmt(expiry):'Validade não comunicada';
+    $('sideExpiry').textContent=expiry?'Até '+dateFmt(expiry):'—';
     $('merchantName').textContent=String(name);
   }catch(e){area.textContent=errorMessage(e);}
 }
-
 async function changePin(){
-  const el=$('pinResult');
-  const oldPin=$('oldPin').value;
-  const newPin=$('newPin').value;
-  const confirmNewPin=$('confirmNewPin').value;
+  const el=$('pinResult');const oldPin=$('oldPin').value,newPin=$('newPin').value,c2=$('confirmNewPin').value;
   if(oldPin.length<4){el.textContent='Introduz o PIN actual.';return;}
-  if(newPin.length<4){el.textContent='O novo PIN deve ter pelo menos 4 dígitos.';return;}
-  if(newPin!==confirmNewPin){el.textContent='A confirmação não coincide com o novo PIN.';return;}
-  if(!confirm('Confirmas a alteração do PIN?'))return;
+  if(newPin.length<4){el.textContent='Novo PIN com ≥ 4 dígitos.';return;}
+  if(newPin!==c2){el.textContent='Confirmação não coincide.';return;}
+  if(!confirm('Confirmar alteração de PIN?'))return;
   el.textContent='A guardar…';
   try{
     await api('/app/security/change-pin','POST',{oldPin,newPin});
-    el.textContent='PIN alterado pelo servidor.';
-    $('oldPin').value='';
-    $('newPin').value='';
-    $('confirmNewPin').value='';
+    el.textContent='PIN alterado.';
+    $('oldPin').value='';$('newPin').value='';$('confirmNewPin').value='';
   }catch(e){el.textContent=errorMessage(e);}
 }
 
-let toastTimer=null;
-function toast(msg){
-  const el=$('toast');
-  if(!el)return;
-  el.textContent=String(msg||'');
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.classList.remove('show'),4500);
-}
-
-// Delegação para os botões "Editar preço / estado" gerados em loadProducts()
-document.addEventListener('click',e=>{
-  const btn=e.target.closest('.product-edit');
-  if(!btn)return;
-  const idx=Number(btn.dataset.productIndex);
-  const list=window.catalogCache||[];
-  if(list[idx])editProduct(list[idx]);
-});
+/* ============ INIT ============ */
+setAuthMode('login');
 </script>
 </body>
 </html>
