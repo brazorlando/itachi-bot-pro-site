@@ -28,7 +28,9 @@ body{
   font-family:'Manrope',ui-sans-serif,system-ui,sans-serif;
   background:var(--bg);color:var(--text);min-height:100vh;
   font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  overflow-x: hidden;
 }
+body.sidebar-open{overflow:hidden !important}
 body::before{
   content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
@@ -345,7 +347,6 @@ tbody tr:hover{background:#151922}
 </head>
 <body>
 
-<!-- ================= LOGIN ================= -->
 <div id="loginScreen"><div class="login-wrap"><div class="login-card">
   <div class="login-brand">
     <div class="mark">I</div>
@@ -397,7 +398,6 @@ tbody tr:hover{background:#151922}
   </div>
 </div></div></div>
 
-<!-- ================= APP ================= -->
 <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar(false)"></div>
 
 <div class="app">
@@ -464,7 +464,6 @@ tbody tr:hover{background:#151922}
 
 <div class="content">
 
-<!-- ============ DASHBOARD ============ -->
 <section class="page active" id="page-dashboard">
   <div class="welcome">
     <div>
@@ -492,7 +491,6 @@ tbody tr:hover{background:#151922}
   </div>
 </section>
 
-<!-- ============ PEDIDOS ============ -->
 <section class="page" id="page-orders">
   <div class="welcome">
     <div><div class="eyebrow">Pedidos</div><h1>Pedidos dos clientes</h1><p>Consulta e remove pedidos pendentes.</p></div>
@@ -515,7 +513,6 @@ tbody tr:hover{background:#151922}
   <div class="card"><div id="ordersArea" class="empty-data">A consultar pedidos…</div></div>
 </section>
 
-<!-- ============ APARELHOS ============ -->
 <section class="page" id="page-devices">
   <div class="welcome">
     <div><div class="eyebrow">Executores Android</div><h1>Aparelhos e activação</h1><p>Associa e monitoriza os teus executores.</p></div>
@@ -534,7 +531,6 @@ tbody tr:hover{background:#151922}
   <div class="device-grid" id="devicesArea" style="margin-top:16px"></div>
 </section>
 
-<!-- ============ PRODUTOS ============ -->
 <section class="page" id="page-products">
   <div class="welcome">
     <div><div class="eyebrow">Catálogo</div><h1>Produtos e pacotes</h1><p>Produtos registados nos grupos da tua conta.</p></div>
@@ -556,7 +552,6 @@ tbody tr:hover{background:#151922}
   </div>
 </section>
 
-<!-- ============ GRUPOS ============ -->
 <section class="page" id="page-groups">
   <div class="welcome">
     <div><div class="eyebrow">WhatsApp</div><h1>Grupos comerciais</h1><p>Grupos configurados no servidor.</p></div>
@@ -565,7 +560,6 @@ tbody tr:hover{background:#151922}
   <div class="card" id="groupsArea"></div>
 </section>
 
-<!-- ============ WHATSAPP ============ -->
 <section class="page" id="page-whatsapp">
   <div class="welcome">
     <div><div class="eyebrow">Bot comercial</div><h1>Estado do WhatsApp</h1><p>Sessão associada à tua conta.</p></div>
@@ -614,7 +608,6 @@ tbody tr:hover{background:#151922}
   </div>
 </section>
   
-<!-- ============ ASSINATURA ============ -->
 <section class="page" id="page-subscription">
   <div class="welcome">
     <div><div class="eyebrow">Conta</div><h1>Assinatura</h1><p>Validade da licença comercial.</p></div>
@@ -623,7 +616,6 @@ tbody tr:hover{background:#151922}
   <div class="card" id="subscriptionArea"></div>
 </section>
 
-<!-- ============ CARTEIRAS ============ -->
 <section class="page" id="page-wallet">
   <div class="welcome">
     <div><div class="eyebrow">Financeiro dos clientes</div><h1>Carteiras e saldos</h1><p>Saldo de um cliente. Não é o saldo de megas das SIMs.</p></div>
@@ -647,7 +639,6 @@ tbody tr:hover{background:#151922}
   </div>
 </section>
 
-<!-- ============ PLANOS ============ -->
 <section class="page" id="page-plans">
   <div class="welcome">
     <div><div class="eyebrow">Subscrição</div><h1>Planos de assinatura</h1><p>Valores fornecidos pelo servidor.</p></div>
@@ -657,7 +648,6 @@ tbody tr:hover{background:#151922}
   <div class="portal-note">A activação depende de confirmação do pagamento. O site nunca activa uma assinatura por si.</div>
 </section>
 
-<!-- ============ PAGAMENTOS ============ -->
 <section class="page" id="page-payments">
   <div class="welcome">
     <div><div class="eyebrow">Pagamentos da conta</div><h1>Renovar assinatura</h1><p>Comprar assinatura é diferente de carregar carteira do cliente.</p></div>
@@ -688,7 +678,6 @@ tbody tr:hover{background:#151922}
   </div>
 </section>
 
-<!-- ============ RELATÓRIOS ============ -->
 <section class="page" id="page-reports">
   <div class="welcome">
     <div><div class="eyebrow">Relatórios</div><h1>Desempenho</h1><p>Números reais. Valores de receita só aparecem quando a API os fornecer.</p></div>
@@ -702,7 +691,6 @@ tbody tr:hover{background:#151922}
   <div class="portal-note">Receita, margem e lucro não são calculados a partir do saldo das carteiras.</div>
 </section>
 
-<!-- ============ CONTA / SEGURANÇA ============ -->
 <section class="page" id="page-settings">
   <div class="welcome">
     <div><div class="eyebrow">Conta e segurança</div><h1>Definições</h1><p>Consulta o perfil e actualiza o PIN.</p></div>
@@ -795,7 +783,6 @@ async function testConnection(){
   }catch(e){box.style.color='var(--rose)';box.textContent='Erro de rede: '+String(e.message||e)+'.';}
 }
 
-/* ============ LOGIN ============ */
 function setAuthMode(mode){
   authMode=mode;
   const isLogin=mode==='login', isReg=mode==='register', isAdmin=mode==='admin';
@@ -891,6 +878,9 @@ function toggleSidebar(force){
   const open=typeof force==='boolean'?force:!o.classList.contains('open');
   o.classList.toggle('open',open);
   ov.classList.toggle('show',open);
+  // Correção: Bloquear o scroll do fundo quando o menu está aberto
+  if (open) document.body.classList.add('sidebar-open');
+  else document.body.classList.remove('sidebar-open');
 }
 function navigate(page){
   const el=$('page-'+page);if(!el)return;
@@ -909,7 +899,6 @@ function refreshCurrent(){
   ({dashboard:loadDashboard,orders:loadOrders,devices:loadDevices,products:loadProducts,groups:loadGroups,whatsapp:loadWhatsApp,subscription:loadSubscription,wallet:()=>{},plans:loadPlans,payments:loadPayments,reports:loadReports,settings:loadAccount})[currentPage]?.();
 }
 
-/* ============ HELPERS UI ============ */
 function kpi(title,value,detail,color='blue'){
   return '<div class="kpi '+color+'"><div class="kpi-top">'+safe(title)+'<span class="kpi-icon">◈</span></div><div class="kpi-value">'+safe(value)+'</div><div class="kpi-foot">'+safe(detail)+'</div></div>';
 }
@@ -920,7 +909,6 @@ function summaryRow(icon,title,detail){
   return '<div class="activity-item"><div class="activity-icon">'+safe(icon)+'</div><div><b>'+safe(title)+'</b><small>'+safe(detail)+'</small></div></div>';
 }
 
-/* ============ DASHBOARD ============ */
 async function loadDashboard(){
   busy('dashboardKpis');busy('orderSummary');busy('operationSummary');
   try{
@@ -956,7 +944,6 @@ async function loadDashboard(){
   }
 }
 
-/* ============ PEDIDOS ============ */
 async function loadOrders(){
   busy('ordersArea');
   try{
@@ -997,7 +984,6 @@ function exportOrdersCsv(){
   setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
 
-/* ============ APARELHOS ============ */
 async function loadDevices(){
   busy('devicesArea');
   try{
@@ -1067,7 +1053,6 @@ async function copyCode(){
   try{await navigator.clipboard.writeText(currentActivation);toast('Copiado.');}catch{toast('Selecciona o código.');}
 }
 
-/* ============ PRODUTOS ============ */
 async function loadProducts(){
   busy('productsArea');
   try{
@@ -1110,7 +1095,6 @@ document.addEventListener('click',e=>{
   if(list[idx])editProduct(list[idx]);
 });
 
-/* ============ GRUPOS ============ */
 async function loadGroups(){
   busy('groupsArea');
   try{
@@ -1121,7 +1105,6 @@ async function loadGroups(){
   }catch(e){fail('groupsArea',errorMessage(e));}
 }
 
-/* ============ WHATSAPP ============ */
 let pairingPollTimer=null;
 let currentPairingCode='';
 let pairingExpiresAt=null;
@@ -1272,8 +1255,7 @@ async function disconnectWhatsApp(){
     await loadWhatsApp();
   }catch(e){toast(errorMessage(e));}
 }
-  
-/* ============ CARTEIRA ============ */
+
 function walletJid(v){
   const t=String(v||'').trim();
   if(!t||t.length>200||/[\s?#&]/.test(t))throw Error('JID inválido.');
@@ -1299,7 +1281,6 @@ async function creditWallet(){
   }catch(e){el.textContent=errorMessage(e);}
 }
 
-/* ============ PLANOS ============ */
 async function loadPlans(){
   busy('plansArea');
   try{
@@ -1323,7 +1304,6 @@ async function loadPlans(){
   }catch(e){fail('plansArea',errorMessage(e));}
 }
 
-/* ============ PAGAMENTOS ============ */
 async function loadPayments(){
   busy('checkoutPlanArea','A consultar planos…');busy('paymentHistory','A consultar histórico…');
   try{
@@ -1371,7 +1351,6 @@ async function verifyPayment(){
   }catch(e){el.textContent=errorMessage(e);}
 }
 
-/* ============ RELATÓRIOS ============ */
 async function loadReports(){
   busy('reportsKpis');busy('reportsOrders','A consultar…');
   try{
@@ -1389,7 +1368,6 @@ async function loadReports(){
   }catch(e){fail('reportsKpis',errorMessage(e));$('reportsOrders').textContent=errorMessage(e);}
 }
 
-/* ============ CONTA ============ */
 async function loadAccount(){
   const area=$('accountArea');area.textContent='A consultar…';
   try{
@@ -1420,7 +1398,6 @@ async function changePin(){
   }catch(e){el.textContent=errorMessage(e);}
 }
 
-/* ============ INIT ============ */
 setAuthMode('login');
 </script>
 </body>
