@@ -1070,47 +1070,210 @@ async function loadGroups(){
 }
 
 /* ============ WHATSAPP ============ */
+/* ============ WHATSAPP ============ */
+let pairingPollTimer=null;
+let currentPairingCode='';
+let pairingExpiresAt=null;
+
+function stopPairingPoll(){
+  if(pairingPollTimer){clearInterval(pairingPollTimer);pairingPollTimer=null;}
+}
+
+function startPairingPoll(){
+  stopPairingPoll();
+  pairingPollTimer=setInterval(async()=>{
+    try{
+      const j=await api('/whatsapp/pairing');
+      const status=j.status||'';
+      if(j.pairingCode){
+        currentPairingCode=j.pairingCode;
+        showPairingCard(j.pairingCode);
+      }
+      if(status==='connected'){
+        stopPairingPoll();
+        hidePairingCard();
+        await loadWhatsApp();
+        toast('WhatsApp ligado com sucesso.');
+      }else if(status==='pairing_expired'||status==='pairing_failed'||status==='disconnected'){
+        if(!currentPairingCode){
+          stopPairingPoll();
+        }
+      }
+    }catch(_){/* ignora falhas de poll */}
+  },3000);
+}
+
+function formatPairingCode(code){
+  const s=String(code||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  if(s.length===8)return s.slice(0,4)+'-'+s.slice(4);
+  return String(code||'');
+}
+
+function showPairingCard(code){
+  const card=$('pairingCard');
+  const big=$('pairingCodeBig');
+  if(!card||!big)return;
+  currentPairingCode=String(code||'');
+  big.textContent=formatPairingCode(currentPairingCode);
+  card.style.display='block';
+  card.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function hidePairingCard(){
+  currentPairingCode='';
+  pairingExpiresAt=null;
+  const card=$('pairingCard');
+  if(card)card.style.display='none';
+  stopPairingPoll();
+}
+
+async function copyPairingCode(){
+  if(!currentPairingCode){toast('Ainda sem código — aguarda uns segundos.');return;}
+  const code=currentPairingCode;
+  const withHyphen=formatPairingCode(code);
+  // tenta clipboard moderno
+  try{
+    await navigator.clipboard.writeText(code);
+    toast('Código copiado: '+withHyphen);
+    return;
+  }catch(_){}
+  // fallback para browsers antigos / http
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=code;
+    ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.focus();ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('Código copiado: '+withHyphen);
+  }catch(e){
+    // último recurso: mostra seleccionável
+    const big=$('pairingCodeBig');
+    if(big){
+      const range=document.createRange();
+      range.selectNodeContents(big);
+      const sel=window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    toast('Copia manualmente (Ctrl+C): '+withHyphen);
+  }
+}
+
 async function loadWhatsApp(){
   busy('whatsappArea');
   try{
     let w=dashboard?.whatsapp;
     if(!w){const j=await api('/api/v4/dashboard');w=j.whatsapp||{};}
-    $('whatsappArea').innerHTML=summaryRow('◉','Ligação',text(w.status||w.state||'—'))+summaryRow('▦','Grupos','Consulta na secção Grupos.');
+    $('whatsappArea').innerHTML=
+      summaryRow('◉','Ligação',text(w.status||w.state||'—'))+
+      summaryRow('▦','Grupos','Consulta na secção Grupos.');
   }catch(e){fail('whatsappArea',errorMessage(e));}
-}
-async function loadSubscription(){
-  busy('subscriptionArea');
+
+  // verifica se há pairing pendente ao entrar na página
   try{
-    const j=await api('/api/v4/subscription');
-    const s=j.subscription||j;const active=s.active??s.ativo;const expiry=s.expiresAt||s.expires_at||j.expiraEm;
-    $('subscriptionArea').innerHTML=summaryRow('◇','Estado',active===true?'Activa':active===false?'Inactiva':'—')+summaryRow('◷','Validade',expiry?dateFmt(expiry):'—')+'<div class="portal-note" style="margin-top:16px">Pagamentos e renovações seguem o mecanismo existente no servidor.</div>';
-  }catch(e){fail('subscriptionArea',errorMessage(e));}
-}
-async function connectWhatsApp(){
-  const phone=$('waPhone').value.replace(/\D/g,'');
-  if(!/^258\d{9}$/.test(phone)){$('waConnectResult').textContent='Prefixo 258 obrigatório.';return;}
-  if(!confirm('Ligar WhatsApp '+phone+'?'))return;
-  const el=$('waConnectResult');el.textContent='A iniciar…';
-  try{
-    const j=await api('/whatsapp/connect','POST',{phone});
-    el.textContent=j.message||j.mensagem||'Pedido aceite.';
-    await loadPairing();
-  }catch(e){el.textContent=errorMessage(e);}
-}
-async function loadPairing(){
-  const el=$('pairingArea');el.textContent='A consultar…';
-  try{
-    const j=await api('/whatsapp/pairing');
-    const code=j.code||j.pairingCode||j.codigo||null;
-    const state=j.status||j.state||j.estado||null;
-    el.innerHTML=(state?summaryRow('◉','Estado',String(state)):'')+(code?summaryRow('▤','Código',String(code)):'')||'Sem código disponível.';
-  }catch(e){el.textContent=errorMessage(e);}
-}
-async function disconnectWhatsApp(){
-  if(!confirm('Desassociar sessão WhatsApp?'))return;
-  try{await api('/whatsapp/disconnect','POST',{});toast('Pedido aceite.');await loadWhatsApp();}catch(e){toast(errorMessage(e));}
+    const p=await api('/whatsapp/pairing');
+    const s=p.status||'';
+    if(p.pairingCode){
+      showPairingCard(p.pairingCode);
+      startPairingPoll();
+    }else if(s==='pairing_code'||s==='awaiting_pairing'||s==='pairing_qr'){
+      startPairingPoll();
+    }else{
+      hidePairingCard();
+    }
+  }catch(_){}
 }
 
+async function connectWhatsApp(){
+  const phone=$('waPhone').value.replace(/\D/g,'');
+  if(!/^258\d{9}$/.test(phone)){
+    $('waConnectResult').textContent='Prefixo 258 obrigatório. Exemplo: 258848352873';
+    return;
+  }
+  if(!confirm('Ligar WhatsApp '+phone+' a esta conta?'))return;
+
+  const el=$('waConnectResult');
+  el.innerHTML='<div class="portal-hint">A pedir código ao servidor…</div>';
+  hidePairingCard();
+
+  try{
+    const j=await api('/whatsapp/connect','POST',{phone});
+
+    // Código veio na resposta → mostra já
+    if(j.pairingCode){
+      showPairingCard(j.pairingCode);
+      el.innerHTML='<div class="portal-hint" style="color:var(--mint)">Código gerado. Vê o cartão acima ☝</div>';
+      startPairingPoll();
+    } else if(j.ok===false){
+      el.innerHTML='<div class="portal-hint" style="color:var(--rose)">'+
+        safe(j.message||j.error||'Falha ao gerar código.')+
+        '</div>';
+    } else {
+      el.innerHTML='<div class="portal-hint">Pedido enviado. O código aparece no cartão acima em 3–10 segundos.</div>';
+      startPairingPoll();
+    }
+
+    // segunda tentativa: por vezes o pairingCode só fica pronto ao fim de 1–2s
+    setTimeout(async()=>{
+      try{
+        const p=await api('/whatsapp/pairing');
+        if(p.pairingCode){
+          showPairingCard(p.pairingCode);
+        }
+      }catch(_){}
+    },2500);
+
+    await loadWhatsApp();
+  }catch(e){
+    el.innerHTML='<div class="portal-hint" style="color:var(--rose)">'+safe(errorMessage(e))+'</div>';
+  }
+}
+
+async function loadPairing(){
+  const el=$('pairingArea');
+  el.textContent='A consultar…';
+  try{
+    const j=await api('/whatsapp/pairing');
+    const code=j.pairingCode||null;
+    const state=j.status||j.state||j.estado||null;
+    const err=j.lastError||null;
+
+    if(code){
+      showPairingCard(code);
+      startPairingPoll();
+      el.innerHTML=summaryRow('◉','Estado',String(state||'pairing_code'));
+      return;
+    }
+
+    if(state==='connected'){
+      hidePairingCard();
+      el.innerHTML=summaryRow('◉','Estado','Conectado')+summaryRow('▦','Número',String(j.phone||'—'));
+      return;
+    }
+
+    if(state==='pairing_failed'||err){
+      el.innerHTML=
+        summaryRow('◉','Estado',String(state||'erro'))+
+        summaryRow('▦','Último erro',String(err||'—'));
+      return;
+    }
+
+    el.innerHTML=(state?summaryRow('◉','Estado',String(state)):'')||'Sem código disponível.';
+  }catch(e){el.textContent=errorMessage(e);}
+}
+
+async function disconnectWhatsApp(){
+  if(!confirm('Desassociar sessão WhatsApp desta conta?'))return;
+  try{
+    await api('/whatsapp/disconnect','POST',{});
+    hidePairingCard();
+    toast('Sessão desassociada.');
+    await loadWhatsApp();
+  }catch(e){toast(errorMessage(e));}
+}
+  
 /* ============ CARTEIRA ============ */
 function walletJid(v){
   const t=String(v||'').trim();
