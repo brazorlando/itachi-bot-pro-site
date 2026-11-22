@@ -277,6 +277,8 @@ tbody tr:hover{background:#151922}
 .device-meta div{display:flex;justify-content:space-between;gap:10px}
 .device-meta span:first-child{color:var(--muted)}
 .device-meta b{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500}
+.device-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.device-mode{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold)}
 
 /* ============ PRODUCTS ============ */
 .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -493,7 +495,7 @@ tbody tr:hover{background:#151922}
 <!-- ============ PEDIDOS ============ -->
 <section class="page" id="page-orders">
   <div class="welcome">
-    <div><div class="eyebrow">Pedidos</div><h1>Pedidos dos clientes</h1><p>Consulta apenas — sem enviar novas operações.</p></div>
+    <div><div class="eyebrow">Pedidos</div><h1>Pedidos dos clientes</h1><p>Consulta e remove pedidos pendentes.</p></div>
     <button class="btn" onclick="loadOrders()">↻ Actualizar</button>
   </div>
   <div class="portal-toolbar">
@@ -506,6 +508,8 @@ tbody tr:hover{background:#151922}
       <option value="unknown">Em verificação</option>
     </select></label>
     <label class="portal-field">Pesquisar<input id="orderSearchText" placeholder="Referência ou número" oninput="renderOrdersTable()"></label>
+    <label class="portal-field">Remover Pendentes (MB)<input id="removePedMB" type="number" placeholder="Ex: 1024" min="100"></label>
+    <button class="btn danger" onclick="removeOrders()" style="height:42px; margin-top:18px">Remover</button>
     <button class="btn" onclick="exportOrdersCsv()">Exportar CSV</button>
   </div>
   <div class="card"><div id="ordersArea" class="empty-data">A consultar pedidos…</div></div>
@@ -514,8 +518,11 @@ tbody tr:hover{background:#151922}
 <!-- ============ APARELHOS ============ -->
 <section class="page" id="page-devices">
   <div class="welcome">
-    <div><div class="eyebrow">Executores Android</div><h1>Aparelhos e activação</h1><p>Associa novos aparelhos à tua conta.</p></div>
-    <button class="btn primary" onclick="createActivation()">＋ Gerar código</button>
+    <div><div class="eyebrow">Executores Android</div><h1>Aparelhos e activação</h1><p>Associa e monitoriza os teus executores.</p></div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn danger" onclick="resetDevices()">↻ Forçar Online</button>
+      <button class="btn primary" onclick="createActivation()">＋ Gerar código</button>
+    </div>
   </div>
   <div class="portal-note">O código é temporário e de uso único. Introduz na APK. Nunca partilhes com estranhos.</div>
   <div id="activationResult">
@@ -565,7 +572,6 @@ tbody tr:hover{background:#151922}
     <button class="btn" onclick="loadWhatsApp()">↻ Actualizar</button>
   </div>
 
-  <!-- ===== CARD DO CÓDIGO DE EMPARELHAMENTO ===== -->
   <div id="pairingCard" class="card" style="display:none;border-color:var(--gold);background:linear-gradient(160deg,#1d1a12,#14161f)">
     <div style="text-align:center">
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--gold);font-weight:800;margin-bottom:10px">
@@ -825,7 +831,6 @@ $('authForm').addEventListener('submit',async ev=>{
   $('authError').textContent='';
   $('authError').style.color='var(--rose)';
 
-  // === ADMIN ===
   if(authMode==='admin'){
     const key=$('adminKey').value.trim();
     if(key.length<32){$('authError').textContent='A chave deve ter pelo menos 32 caracteres.';return;}
@@ -846,7 +851,6 @@ $('authForm').addEventListener('submit',async ev=>{
     }
   }
 
-  // === COMERCIANTE ===
   const phone=phoneNormalize($('authPhone').value);
   const pin=$('authPin').value;
   if(!/^(84|85|86|87|82|83)\d{7}$/.test(phone)){$('authError').textContent='Número moçambicano inválido.';return;}
@@ -972,6 +976,16 @@ function renderOrdersTable(){
     +list.map(o=>'<tr><td class="mono">'+safe(String(o.id||o.pedidoId||'—').slice(0,18))+'</td><td>'+safe(o.destination||o.numero||'—')+'</td><td class="mono">'+safe(o.quantityMB??o.quantity_mb??o.quantidadeMB??'—')+' MB</td><td>'+safe(stateLabel(o.status||o.estado))+'</td><td>'+safe(o.createdAt?dateFmt(o.createdAt):o.created_at?dateFmt(o.created_at):'—')+'</td></tr>').join('')
     +'</tbody></table>';
 }
+async function removeOrders(){
+  const mb = Number($('removePedMB').value);
+  if(!mb || mb < 100) return toast('Introduz um tamanho válido em MB (ex: 1024).');
+  if(!confirm('Remover todos os pedidos pendentes de ' + mb + ' MB?')) return;
+  try{
+    const r = await api('/orders/remove', 'POST', { quantityMB: mb });
+    toast(`✅ ${r.removed} pedido(s) removido(s).`);
+    await loadOrders();
+  }catch(e){ toast(errorMessage(e)); }
+}
 function exportOrdersCsv(){
   if(!ordersCache.length){toast('Sem pedidos para exportar.');return;}
   const cols=['Referência','Destino','Qtd MB','Estado','Data'];
@@ -993,10 +1007,48 @@ async function loadDevices(){
     if(!list.length){busy('devicesArea','Sem aparelhos associados.');return;}
     $('devicesArea').innerHTML=list.map(d=>{
       const online=d.online===true,enabled=d.enabled??d.ativo;
-      return '<div class="device"><div class="device-top"><div class="device-symbol">▣</div><span class="status '+(online?'ok':'wait')+'">'+(online?'Online':'Off')+'</span></div><h3>'+safe(d.nome||d.label||'Android')+'</h3><p>Executor da conta</p><div class="device-meta"><div><span>ID</span><b>'+safe(String(d.uuid||d.id||'—').slice(0,16))+'</b></div><div><span>Autorizado</span><b>'+(d.aprovado===true||d.approved===true?'Sim':'—')+'</b></div><div><span>Activo</span><b>'+(enabled===true?'Sim':enabled===false?'Não':'—')+'</b></div></div></div>';
+      const sim1 = d.sim1 != null ? num(d.sim1) + ' MB' : '—';
+      const sim2 = d.sim2 != null ? num(d.sim2) + ' MB' : '—';
+      const mode = d.mode || 'normal';
+      const modeLabel = {sms: 'SMS', normal: 'Normal', special: 'Especial'}[mode] || mode;
+      
+      return '<div class="device">'
+        +'<div class="device-top"><div class="device-symbol">▣</div><span class="status '+(online?'ok':'wait')+'">'+(online?'Online':'Off')+'</span></div>'
+        +'<h3>'+safe(d.nome||d.label||'Android')+'</h3>'
+        +'<p>Executor da conta</p>'
+        +'<div class="device-meta">'
+        +'<div><span>ID</span><b>'+safe(String(d.uuid||d.id||'—').slice(0,16))+'</b></div>'
+        +'<div><span>Modo</span><span class="device-mode">'+safe(modeLabel)+'</span></div>'
+        +'<div><span>SIM 1</span><b>'+safe(sim1)+'</b></div>'
+        +'<div><span>SIM 2</span><b>'+safe(sim2)+'</b></div>'
+        +'</div>'
+        +'<div class="device-actions">'
+        +'<button class="btn small ghost" onclick="changeDeviceMode(\''+safe(d.uuid||d.id)+'\', \'normal\')">Normal</button>'
+        +'<button class="btn small ghost" onclick="changeDeviceMode(\''+safe(d.uuid||d.id)+'\', \'special\')">Especial</button>'
+        +'<button class="btn small ghost" onclick="changeDeviceMode(\''+safe(d.uuid||d.id)+'\', \'sms\')">SMS</button>'
+        +'</div>'
+        +'</div>';
     }).join('');
   }catch(e){fail('devicesArea',errorMessage(e));}
 }
+
+async function changeDeviceMode(id, mode){
+  try {
+    await api('/devices/'+id+'/mode', 'PATCH', { mode });
+    toast('Modo alterado para ' + mode.toUpperCase());
+    await loadDevices();
+  } catch(e) { toast(errorMessage(e)); }
+}
+
+async function resetDevices(){
+  if(!confirm('Limpar TODOS os pedidos pendentes e forçar os aparelhos a ficarem ONLINE?')) return;
+  try{
+    await api('/devices/reset', 'POST', {});
+    toast('Sistema reiniciado com sucesso.');
+    await loadDevices();
+  }catch(e){ toast(errorMessage(e)); }
+}
+
 async function createActivation(){
   if(!confirm('Gerar código temporário para APK?'))return;
   $('activationResult').style.display='none';
@@ -1070,7 +1122,6 @@ async function loadGroups(){
 }
 
 /* ============ WHATSAPP ============ */
-/* ============ WHATSAPP ============ */
 let pairingPollTimer=null;
 let currentPairingCode='';
 let pairingExpiresAt=null;
@@ -1099,7 +1150,7 @@ function startPairingPoll(){
           stopPairingPoll();
         }
       }
-    }catch(_){/* ignora falhas de poll */}
+    }catch(_){}
   },3000);
 }
 
@@ -1131,31 +1182,17 @@ async function copyPairingCode(){
   if(!currentPairingCode){toast('Ainda sem código — aguarda uns segundos.');return;}
   const code=currentPairingCode;
   const withHyphen=formatPairingCode(code);
-  // tenta clipboard moderno
-  try{
-    await navigator.clipboard.writeText(code);
-    toast('Código copiado: '+withHyphen);
-    return;
-  }catch(_){}
-  // fallback para browsers antigos / http
+  try{await navigator.clipboard.writeText(code);toast('Código copiado: '+withHyphen);return;}catch(_){}
   try{
     const ta=document.createElement('textarea');
-    ta.value=code;
-    ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);
-    ta.focus();ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+    ta.value=code;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');document.body.removeChild(ta);
     toast('Código copiado: '+withHyphen);
   }catch(e){
-    // último recurso: mostra seleccionável
     const big=$('pairingCodeBig');
     if(big){
-      const range=document.createRange();
-      range.selectNodeContents(big);
-      const sel=window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
+      const range=document.createRange();range.selectNodeContents(big);
+      const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
     }
     toast('Copia manualmente (Ctrl+C): '+withHyphen);
   }
@@ -1171,18 +1208,12 @@ async function loadWhatsApp(){
       summaryRow('▦','Grupos','Consulta na secção Grupos.');
   }catch(e){fail('whatsappArea',errorMessage(e));}
 
-  // verifica se há pairing pendente ao entrar na página
   try{
     const p=await api('/whatsapp/pairing');
     const s=p.status||'';
-    if(p.pairingCode){
-      showPairingCard(p.pairingCode);
-      startPairingPoll();
-    }else if(s==='pairing_code'||s==='awaiting_pairing'||s==='pairing_qr'){
-      startPairingPoll();
-    }else{
-      hidePairingCard();
-    }
+    if(p.pairingCode){showPairingCard(p.pairingCode);startPairingPoll();}
+    else if(s==='pairing_code'||s==='awaiting_pairing'||s==='pairing_qr'){startPairingPoll();}
+    else{hidePairingCard();}
   }catch(_){}
 }
 
@@ -1193,38 +1224,24 @@ async function connectWhatsApp(){
     return;
   }
   if(!confirm('Ligar WhatsApp '+phone+' a esta conta?'))return;
-
   const el=$('waConnectResult');
   el.innerHTML='<div class="portal-hint">A pedir código ao servidor…</div>';
   hidePairingCard();
-
   try{
     const j=await api('/whatsapp/connect','POST',{phone});
-
-    // Código veio na resposta → mostra já
     if(j.pairingCode){
       showPairingCard(j.pairingCode);
       el.innerHTML='<div class="portal-hint" style="color:var(--mint)">Código gerado. Vê o cartão acima ☝</div>';
       startPairingPoll();
     } else if(j.ok===false){
-      el.innerHTML='<div class="portal-hint" style="color:var(--rose)">'+
-        safe(j.message||j.error||'Falha ao gerar código.')+
-        '</div>';
+      el.innerHTML='<div class="portal-hint" style="color:var(--rose)">'+safe(j.message||j.error||'Falha ao gerar código.')+'</div>';
     } else {
       el.innerHTML='<div class="portal-hint">Pedido enviado. O código aparece no cartão acima em 3–10 segundos.</div>';
       startPairingPoll();
     }
-
-    // segunda tentativa: por vezes o pairingCode só fica pronto ao fim de 1–2s
     setTimeout(async()=>{
-      try{
-        const p=await api('/whatsapp/pairing');
-        if(p.pairingCode){
-          showPairingCard(p.pairingCode);
-        }
-      }catch(_){}
+      try{const p=await api('/whatsapp/pairing');if(p.pairingCode){showPairingCard(p.pairingCode);}}catch(_){}
     },2500);
-
     await loadWhatsApp();
   }catch(e){
     el.innerHTML='<div class="portal-hint" style="color:var(--rose)">'+safe(errorMessage(e))+'</div>';
@@ -1239,27 +1256,9 @@ async function loadPairing(){
     const code=j.pairingCode||null;
     const state=j.status||j.state||j.estado||null;
     const err=j.lastError||null;
-
-    if(code){
-      showPairingCard(code);
-      startPairingPoll();
-      el.innerHTML=summaryRow('◉','Estado',String(state||'pairing_code'));
-      return;
-    }
-
-    if(state==='connected'){
-      hidePairingCard();
-      el.innerHTML=summaryRow('◉','Estado','Conectado')+summaryRow('▦','Número',String(j.phone||'—'));
-      return;
-    }
-
-    if(state==='pairing_failed'||err){
-      el.innerHTML=
-        summaryRow('◉','Estado',String(state||'erro'))+
-        summaryRow('▦','Último erro',String(err||'—'));
-      return;
-    }
-
+    if(code){showPairingCard(code);startPairingPoll();el.innerHTML=summaryRow('◉','Estado',String(state||'pairing_code'));return;}
+    if(state==='connected'){hidePairingCard();el.innerHTML=summaryRow('◉','Estado','Conectado')+summaryRow('▦','Número',String(j.phone||'—'));return;}
+    if(state==='pairing_failed'||err){el.innerHTML=summaryRow('◉','Estado',String(state||'erro'))+summaryRow('▦','Último erro',String(err||'—'));return;}
     el.innerHTML=(state?summaryRow('◉','Estado',String(state)):'')||'Sem código disponível.';
   }catch(e){el.textContent=errorMessage(e);}
 }
